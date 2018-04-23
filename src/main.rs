@@ -3,12 +3,12 @@ extern crate image;
 use std::fs::File;
 
 
-fn line(x0: i32, y0: i32, x1: i32, y1: i32, image: &mut image::RgbImage) -> () {
+fn line(x0: i32, y0: i32, x1: i32, y1: i32, buffer: &mut image::RgbImage) -> () {
     for t in 0..10000 {
         let t = t as f32 * 0.0001;
         let x = x0 as f32 * (1.0 - t) + x1 as f32 * t;
         let y = y0 as f32 * (1.0 - t) + y1 as f32 * t;
-        image.put_pixel(x as u32, y as u32, image::Rgb([255, 255, 255]));
+        buffer.put_pixel(x as u32, y as u32, image::Rgb([255, 255, 255]));
     }
 }
 
