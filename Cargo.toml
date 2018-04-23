@@ -5,3 +5,8 @@ authors = ["mandeep <mandeep@users.noreply.github.com>"]
 
 [dependencies]
 image = "0.18.0"
+
+[profile.dev]
+opt-level = 2
+debug = true
+incremental = true
