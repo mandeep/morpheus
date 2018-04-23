@@ -16,5 +16,7 @@ fn main() {
     let mut buffer = image::ImageBuffer::new(512, 512);
     line(0, 0, 512, 512, &mut buffer);
     let ref mut fout = File::create("output.png").unwrap();
-    image::ImageRgb8(buffer).flipv().save(fout, image::PNG).unwrap();
+    image::ImageRgb8(buffer).flipv()
+                            .save(fout, image::PNG)
+                            .unwrap();
 }
