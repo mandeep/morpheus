@@ -1,31 +1,21 @@
 extern crate image;
 
 use std::fs::File;
+use std::mem::swap;
 
 
 fn line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut image::RgbImage) -> () {
     let mut steep = false;
     
     if (x0 - x1).abs() < (y0 - y1).abs() {
-        let x0temp = x0.clone();
-        x0 = y0;
-        y0 = x0temp;
-
-        let x1temp = x1.clone();
-        x1 = y1;
-        y1 = x1temp;
-
+        swap(&mut x0, &mut y0);
+        swap(&mut x1, &mut y1);
         steep = true;
     }
     
     if x0 > x1 {
-        let x0temp = x0.clone();
-        x0 = x1;
-        x1 = x0temp;
-
-        let y0temp = y0.clone();
-        y0 = y1;
-        y1 = y0temp;
+        swap(&mut x0, &mut x1);
+        swap(&mut y0, &mut y1);
     }
 
     let dx = x1 - x0;
