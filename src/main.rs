@@ -1,7 +1,8 @@
 extern crate image;
-extern crate wavefront_obj;
+extern crate obj;
 
 use std::fs::File;
+use std::io::BufReader;
 use std::mem::swap;
 
 
@@ -44,10 +45,8 @@ fn line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut image::
 }
 
 fn main() {
-    let mut buffer = image::ImageBuffer::new(512, 512);
-    // let reader = BufReader::new(File::open("head.obj").unwrap());
-    let face = wavefront_obj::obj::parse(String::from("head.obj")).unwrap();
-    
+    let buffer = image::ImageBuffer::new(512, 512);
+    let vertices: obj::Obj = obj::load_obj(BufReader::new(File::open("head.obj").unwrap())).unwrap();
     // line(0, 0, 511, 511, &mut buffer, image::Rgb([255, 255, 255]));
     // line(13, 20, 400, 200, &mut buffer, image::Rgb([255, 0, 0])); 
     // line(20, 13, 300, 100, &mut buffer, image::Rgb([0, 255, 0])); 
