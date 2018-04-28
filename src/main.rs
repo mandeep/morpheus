@@ -90,8 +90,7 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, heig
 }
 
 fn main() {
-    let width = 1600;
-    let height = 1600;
+    let (width, height) = (1600, 1600);
     let mut buffer = image::ImageBuffer::new(width, height);
 
     draw_wire_mesh("head.obj", &mut buffer, width, height);    
