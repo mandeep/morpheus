@@ -28,15 +28,14 @@ impl Object {
                 vertices.push(Vector3::new(v_coordinates[0], v_coordinates[1], v_coordinates[2]));
             }
             else if line.starts_with("f ") {
+                
                 let f_coordinates = line.split_at(1).1
-                                        .split_whitespace()
-                                        .collect::<Vec<&str>>();
-                                        
-                let x = f_coordinates[0].split("/").map(|n| n.parse().unwrap()).nth(0).unwrap();
-                let y = f_coordinates[1].split("/").map(|n| n.parse().unwrap()).nth(0).unwrap();
-                let z = f_coordinates[2].split("/").map(|n| n.parse().unwrap()).nth(0).unwrap();
-
-                faces.push(vec![x, y, z])
+                                        .split(|c| c == '/' || c == ' ')
+                                        .filter(|e| e.len() > 0)
+                                        .map(|n| n.parse().unwrap())
+                                        .collect::<Vec<i32>>();
+    
+                faces.push(vec![f_coordinates[0], f_coordinates[3], f_coordinates[6]])
             }
         }
         Object { vertices: vertices, faces: faces }
