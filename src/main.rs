@@ -23,7 +23,7 @@ mod wavefront;
 /// line(0, 0, 511, 511, &mut buffer, image::Rgb([128, 0, 255]))
 /// ```
 ///
-fn line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
+fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
     let steep = (x0 - x1).abs() < (y0 - y1).abs();
     
     if steep {
@@ -74,7 +74,7 @@ fn main() {
             let y0 = ((v0.y + 1.0) * height as f64 / 2.0).min(height as f64 - 1.0);
             let x1 = ((v1.x + 1.0) * width as f64 / 2.0).min(width as f64 - 1.0);
             let y1 = ((v1.y + 1.0) * height as f64 / 2.0).min(height as f64 - 1.0);
-            line(x0 as i32, y0 as i32, x1 as i32, y1 as i32, &mut buffer, image::Rgb([255, 255, 255]));
+            draw_line(x0 as i32, y0 as i32, x1 as i32, y1 as i32, &mut buffer, image::Rgb([255, 255, 255]));
         }
     }
 
