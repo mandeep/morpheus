@@ -95,7 +95,7 @@ fn main() {
 
     draw_wire_mesh("../head.obj", &mut buffer, width, height);    
 
-    let ref mut fout = File::create("../output.png").unwrap();
+    let ref mut fout = File::create("../wire_mesh.png").unwrap();
     image::ImageRgb8(buffer).flipv()
                             .save(fout, image::PNG)
                             .unwrap();

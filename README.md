@@ -4,4 +4,4 @@
 Raw Renderer is a Rust implementation of a minimal renderer
 based on the [Tiny Renderer](https://github.com/ssloy/tinyrenderer/) wiki course.
 
-![Screenshot](output.png)
+![Wire Mesh](wire_mesh.png)
