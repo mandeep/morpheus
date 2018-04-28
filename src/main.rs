@@ -93,7 +93,7 @@ fn main() {
     let (width, height) = (1600, 1600);
     let mut buffer = image::ImageBuffer::new(width, height);
 
-    draw_wire_mesh("head.obj", &mut buffer, width, height);    
+    draw_wire_mesh("../head.obj", &mut buffer, width, height);    
 
     let ref mut fout = File::create("../output.png").unwrap();
     image::ImageRgb8(buffer).flipv()
