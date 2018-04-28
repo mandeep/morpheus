@@ -46,12 +46,12 @@ fn line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut image::
 
 fn main() {
     let mut buffer = image::ImageBuffer::new(512, 512);
-    let vertices = BufReader::new(File::open("head.obj").unwrap());
     
     line(0, 0, 511, 511, &mut buffer, image::Rgb([255, 255, 255]));
     line(13, 20, 400, 200, &mut buffer, image::Rgb([255, 0, 0])); 
     line(20, 13, 300, 100, &mut buffer, image::Rgb([0, 255, 0])); 
     line(80, 40, 130, 200, &mut buffer, image::Rgb([0, 0, 255]));
+
     let ref mut fout = File::create("output.png").unwrap();
     image::ImageRgb8(buffer).flipv()
                             .save(fout, image::PNG)
