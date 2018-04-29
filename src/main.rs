@@ -92,10 +92,6 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, heig
 }
 
 fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
-    if t0.y == t1.y && t0.y == t2.y {
-        return;
-    }
-
     if t0.y > t1.y {
         swap(&mut t0, &mut t1);
     }
