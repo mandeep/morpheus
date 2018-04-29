@@ -109,7 +109,7 @@ fn draw_triangle(points: &Vec<Point2<f64>>, buffer: &mut image::RgbImage, color:
 ///
 /// draw_wire_mesh("coordinates.obj", &mut buffer, width, height); 
 /// ```
-fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, height: u32) {
+fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
     let coordinates = wavefront::Object::new(filename);
 
     for face in coordinates.faces {
@@ -117,11 +117,11 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, heig
             let v0 = coordinates.vertices[(face[i] - 1) as usize];
             let v1 = coordinates.vertices[(face[(i+1) % 3] - 1) as usize];
             
-            let x0 = ((v0.x + 1.0) * width as f64 / 2.0).min(width as f64 - 1.0);
-            let y0 = ((v0.y + 1.0) * height as f64 / 2.0).min(height as f64 - 1.0);
+            let x0 = ((v0.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
+            let y0 = ((v0.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
             
-            let x1 = ((v1.x + 1.0) * width as f64 / 2.0).min(width as f64 - 1.0);
-            let y1 = ((v1.y + 1.0) * height as f64 / 2.0).min(height as f64 - 1.0);
+            let x1 = ((v1.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
+            let y1 = ((v1.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
             
             draw_line(x0 as i32, y0 as i32, x1 as i32, y1 as i32, buffer, image::Rgb([255, 255, 255]));
         }
