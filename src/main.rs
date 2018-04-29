@@ -107,7 +107,7 @@ fn draw_triangle(points: &Vec<Point2<f64>>, buffer: &mut image::RgbImage, color:
 /// let height = 512;
 /// let mut buffer = image::ImageBuffer::new(width, height);
 ///
-/// draw_wire_mesh("coordinates.obj", &mut buffer, width, height); 
+/// draw_wire_mesh("coordinates.obj", &mut buffer); 
 /// ```
 fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
     let coordinates = wavefront::Object::new(filename);
