@@ -1,10 +1,13 @@
 #![allow(dead_code)]
 extern crate image;
 extern crate nalgebra;
+extern crate rand;
 
 use std::fs::File;
 use std::mem::swap;
-use nalgebra::core::Vector2;
+use nalgebra::geometry::Point2;
+use nalgebra::core::Vector3;
+use rand::Rng;
 
 mod wavefront;
 
@@ -43,7 +46,7 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
     let derror = (dy * 2).abs();
     let mut error = 0;
 
-    for x in x0..=x1 {
+    for x in x0 ..= x1 {
         if steep {
             buffer.put_pixel(y as u32, x as u32, color);
         } else {
@@ -57,6 +60,42 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
                 y -= 1;
             }
             error -= dx * 2;
+        }
+    }
+}
+
+fn find_barycentric(points: &Vec<Point2<f64>>, point: Point2<f64>) -> Vector3<f64> {
+    let u = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
+    let v = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
+
+    let w = u.cross(&v);
+
+    if (w.z).abs() < 1.0 {
+        return Vector3::new(-1.0, 1.0, 1.0);
+    } else {
+        return Vector3::new(1.0 - (w.x + w.y) as f64 / w.z as f64, w.y as f64 / w.z as f64, w.x as f64 / w.z as f64);
+    }
+
+}
+
+fn draw_triangle(points: &Vec<Point2<f64>>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
+    let mut bounding_box_minimum: Point2<f64> = Point2::new(buffer.width() as f64 - 1.0, buffer.height() as f64 - 1.0);
+    let mut bounding_box_maximum: Point2<f64> = Point2::new(0.0, 0.0);
+
+    for point in points {
+        bounding_box_minimum.x = bounding_box_minimum.x.min(point.x);
+        bounding_box_minimum.y = bounding_box_minimum.y.min(point.y);
+        bounding_box_maximum.x = bounding_box_maximum.x.max(point.x);
+        bounding_box_maximum.y = bounding_box_maximum.y.max(point.y);
+    }
+
+    for x in bounding_box_minimum.x as i32 ..= bounding_box_maximum.x as i32 {
+        for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
+            let point = Point2::new(x as f64, y as f64);
+            let barycentric_coordinates: Vector3<f64> = find_barycentric(points, point);
+            if barycentric_coordinates.x >= 0.0 && barycentric_coordinates.y >= 0.0 && barycentric_coordinates.z >= 0.0 {
+                buffer.put_pixel(point.x as u32, point.y as u32, color);
+            }
         }
     }
 }
@@ -91,52 +130,30 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, heig
     }
 }
 
-fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
-    if t0.y > t1.y {
-        swap(&mut t0, &mut t1);
-    }
-    if t0.y > t2.y {
-        swap(&mut t0, &mut t2);
-    }
-    if t1.y > t2.y {
-        swap(&mut t1, &mut t2);
-    }
+fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, height: u32) {
+    let coordinates = wavefront::Object::new(filename);
 
-    let triangle_height = t2.y - t0.y;
+    for face in coordinates.faces {
+        let mut screen_coordinates: Vec<Point2<f64>> = Vec::new();
+        for i in 0..3 {
+            let world_coordinates: Vector3<f64> = coordinates.vertices[(face[i] - 1) as usize];
 
-    for i in 0..triangle_height as i32 {
-        let second_half = i > (t1.y - t0.y) as i32 || (t1.y == t0.y);
-        let segment_height = if second_half {t2.y - t1.y} else {t1.y - t0.y};
-        
-        let alpha = i as f64 / triangle_height as f64;
-        let beta = if second_half { (i as f64 - (t1.y - t0.y) as f64) / segment_height as f64} else {i as f64 / segment_height as f64};
-
-        let mut a = t0.x as f64 + ((t2 - t0).x as f64 * alpha);
-        let mut b = if second_half {t1.x as f64 + ((t2 - t1).x as f64 * beta)} else {t0.x as f64 + ((t1 - t0).x as f64 * beta)};
-
-        if a > b {
-            swap(&mut a, &mut b);
+            let pointx = ((world_coordinates.x + 1.0) * width as f64 / 2.0).min(width as f64 - 1.0);
+            let pointy = ((world_coordinates.y + 1.0) * height as f64 / 2.0).min(height as f64 - 1.0);
+            screen_coordinates.push(Point2::new(pointx, pointy));
         }
-
-        for j in (a as u32)..=(b as u32) {
-            buffer.put_pixel(j, t0.y as u32 + i as u32, color);
-        }
+        let mut rng = rand::thread_rng();
+        draw_triangle(&screen_coordinates, buffer, image::Rgb([rng.gen::<u8>() % 255, rng.gen::<u8>() % 255, rng.gen::<u8>() % 255]));
     }
 }
 
 fn main() {
-    let (width, height) = (200, 200);
+    let (width, height) = (1600, 1600);
     let mut buffer = image::ImageBuffer::new(width, height);
 
-    let t0 = vec![Vector2::new(10, 70), Vector2::new(50, 160), Vector2::new(70, 80)]; 
-    let t1 = vec![Vector2::new(180, 50), Vector2::new(150, 1), Vector2::new(70, 180)]; 
-    let t2 = vec![Vector2::new(180, 150), Vector2::new(120, 160), Vector2::new(130, 180)]; 
+    draw_triangle_mesh("../porsche.obj", &mut buffer, width, height);
 
-    draw_triangle(t0[0], t0[1], t0[2], &mut buffer, image::Rgb([255, 0, 0]));    
-    draw_triangle(t1[0], t1[1], t1[2], &mut buffer, image::Rgb([255, 255, 255]));    
-    draw_triangle(t2[0], t2[1], t2[2], &mut buffer, image::Rgb([0, 255, 0]));    
-
-    let ref mut fout = File::create("../triangle.png").unwrap();
+    let ref mut fout = File::create("../triangle_mesh.png").unwrap();
     image::ImageRgb8(buffer).flipv()
                             .save(fout, image::PNG)
                             .unwrap();
