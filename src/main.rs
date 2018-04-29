@@ -5,7 +5,7 @@ extern crate nalgebra;
 use std::fs::File;
 use std::mem::swap;
 use nalgebra::geometry::Point2;
-use nalgebra::core::Vector3;
+use nalgebra::core::{Vector2, Vector3};
 
 mod wavefront;
 
@@ -62,6 +62,39 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
     }
 }
 
+fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
+    if t0.y > t1.y {
+        swap(&mut t0, &mut t1);
+    }
+    if t0.y > t2.y {
+        swap(&mut t0, &mut t2);
+    }
+    if t1.y > t2.y {
+        swap(&mut t1, &mut t2);
+    }
+
+    let triangle_height = t2.y - t0.y;
+
+    for i in 0..triangle_height as i32 {
+        let second_half = i > (t1.y - t0.y) as i32 || (t1.y == t0.y);
+        let segment_height = if second_half {t2.y - t1.y} else {t1.y - t0.y};
+        
+        let alpha = i as f64 / triangle_height as f64;
+        let beta = if second_half { (i as f64 - (t1.y - t0.y) as f64) / segment_height as f64} else {i as f64 / segment_height as f64};
+
+        let mut a = t0.x as f64 + ((t2 - t0).x as f64 * alpha);
+        let mut b = if second_half {t1.x as f64 + ((t2 - t1).x as f64 * beta)} else {t0.x as f64 + ((t1 - t0).x as f64 * beta)};
+
+        if a > b {
+            swap(&mut a, &mut b);
+        }
+
+        for j in (a as u32)..=(b as u32) {
+            buffer.put_pixel(j, t0.y as u32 + i as u32, color);
+        }
+    }
+}
+
 fn find_barycentric(points: &Vec<Point2<f64>>, point: Point2<f64>) -> Vector3<f64> {
     let u = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
     let v = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
@@ -76,7 +109,7 @@ fn find_barycentric(points: &Vec<Point2<f64>>, point: Point2<f64>) -> Vector3<f6
 
 }
 
-fn draw_triangle(points: &Vec<Point2<f64>>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
+fn draw_triangles(points: &Vec<Point2<f64>>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
     let mut bounding_box_minimum: Point2<f64> = Point2::new(buffer.width() as f64 - 1.0, buffer.height() as f64 - 1.0);
     let mut bounding_box_maximum: Point2<f64> = Point2::new(0.0, 0.0);
 
@@ -147,7 +180,7 @@ fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector
         let intensity: f64 = normal.dot(&light_vector);
 
         if intensity > 0.0 {
-            draw_triangle(&screen_coordinates, buffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
+            draw_triangles(&screen_coordinates, buffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
         }
     }
 }
