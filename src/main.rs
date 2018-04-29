@@ -105,11 +105,11 @@ fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32
     let triangle_height = t2.y - t0.y;
 
     for i in 0..triangle_height as i32 {
-        let second_half: bool = i > (t1.y - t0.y) as i32 || (t1.y == t0.y);
+        let second_half = i > (t1.y - t0.y) as i32 || (t1.y == t0.y);
         let segment_height = if second_half {t2.y - t1.y} else {t1.y - t0.y};
         
-        let alpha: f64 = i as f64 / triangle_height as f64;
-        let beta: f64 = if second_half { (i as f64 - (t1.y - t0.y) as f64) / segment_height as f64} else {i as f64 / segment_height as f64};
+        let alpha = i as f64 / triangle_height as f64;
+        let beta = if second_half { (i as f64 - (t1.y - t0.y) as f64) / segment_height as f64} else {i as f64 / segment_height as f64};
 
         let mut a = t0.x as f64 + ((t2 - t0).x as f64 * alpha);
         let mut b = if second_half {t1.x as f64 + ((t2 - t1).x as f64 * beta)} else {t0.x as f64 + ((t1 - t0).x as f64 * beta)};
