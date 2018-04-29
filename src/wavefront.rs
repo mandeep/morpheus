@@ -27,11 +27,11 @@ impl Object {
 
                 vertices.push(Vector3::new(v_coordinates[0], v_coordinates[1], v_coordinates[2]));
             }
-            else if line.starts_with("f ") {
-                
-                let f_coordinates = line.split_at(1).1
+            else if line.starts_with("f ") {            
+                let f_coordinates = line.replace("//", "/0/")
+                                        .split_at(1).1
                                         .split(|c| c == '/' || c == ' ')
-                                        .filter(|e| e.len() > 0)
+                                        .filter(|s| s.len() > 0)
                                         .map(|n| n.parse().unwrap())
                                         .collect::<Vec<i32>>();
     
