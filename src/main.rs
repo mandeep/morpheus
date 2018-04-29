@@ -91,7 +91,7 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, heig
     }
 }
 
-fn draw_triangle(mut t0: Vector2<f64>, mut t1: Vector2<f64>, mut t2: Vector2<f64>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
+fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
     if t0.y == t1.y && t0.y == t2.y {
         return;
     }
@@ -106,23 +106,23 @@ fn draw_triangle(mut t0: Vector2<f64>, mut t1: Vector2<f64>, mut t2: Vector2<f64
         swap(&mut t1, &mut t2);
     }
 
-    let triangle_height: f64 = t2.y - t0.y;
+    let triangle_height = t2.y - t0.y;
 
     for i in 0..triangle_height as i32 {
         let second_half: bool = i > (t1.y - t0.y) as i32 || (t1.y == t0.y);
         let segment_height = if second_half {t2.y - t1.y} else {t1.y - t0.y};
         
-        let alpha: f64 = i as f64 / triangle_height;
-        let beta: f64 = if second_half { (i as f64 - (t1.y - t0.y)) / segment_height} else {i as f64 / segment_height};
+        let alpha: f64 = i as f64 / triangle_height as f64;
+        let beta: f64 = if second_half { (i as f64 - (t1.y - t0.y) as f64) / segment_height as f64} else {i as f64 / segment_height as f64};
 
-        let mut a = t0 + ((t2 - t0) * alpha);
-        let mut b = if second_half {t1 + ((t2 - t1) * beta)} else {t0 + ((t1 - t0) * beta)};
+        let mut a = t0.x as f64 + ((t2 - t0).x as f64 * alpha);
+        let mut b = if second_half {t1.x as f64 + ((t2 - t1).x as f64 * beta)} else {t0.x as f64 + ((t1 - t0).x as f64 * beta)};
 
-        if a.x > b.x {
+        if a > b {
             swap(&mut a, &mut b);
         }
 
-        for j in (a.x as u32)..=(b.x as u32) {
+        for j in (a as u32)..=(b as u32) {
             buffer.put_pixel(j, t0.y as u32 + i as u32, color);
         }
     }
@@ -132,9 +132,9 @@ fn main() {
     let (width, height) = (200, 200);
     let mut buffer = image::ImageBuffer::new(width, height);
 
-    let t0 = vec![Vector2::new(10.0, 70.0), Vector2::new(50.0, 160.0), Vector2::new(70.0, 80.0)]; 
-    let t1 = vec![Vector2::new(180.0, 50.0), Vector2::new(150.0, 1.0), Vector2::new(70.0, 180.0)]; 
-    let t2 = vec![Vector2::new(180.0, 150.0), Vector2::new(120.0, 160.0), Vector2::new(130.0, 180.0)]; 
+    let t0 = vec![Vector2::new(10, 70), Vector2::new(50, 160), Vector2::new(70, 80)]; 
+    let t1 = vec![Vector2::new(180, 50), Vector2::new(150, 1), Vector2::new(70, 180)]; 
+    let t2 = vec![Vector2::new(180, 150), Vector2::new(120, 160), Vector2::new(130, 180)]; 
 
     draw_triangle(t0[0], t0[1], t0[2], &mut buffer, image::Rgb([255, 0, 0]));    
     draw_triangle(t1[0], t1[1], t1[2], &mut buffer, image::Rgb([255, 255, 255]));    
