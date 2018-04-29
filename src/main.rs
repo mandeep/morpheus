@@ -144,7 +144,7 @@ fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector
             world_coordinates.push(world_coordinate);
         }
         let normal: Vector3<f64> = (world_coordinates[2] - world_coordinates[0]).cross(&(world_coordinates[1] - world_coordinates[0])).normalize();
-        let intensity = normal.dot(&light_vector);
+        let intensity: f64 = normal.dot(&light_vector);
 
         if intensity > 0.0 {
             draw_triangle(&screen_coordinates, buffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
