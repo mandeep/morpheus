@@ -1,13 +1,11 @@
 #![allow(dead_code)]
 extern crate image;
 extern crate nalgebra;
-extern crate rand;
 
 use std::fs::File;
 use std::mem::swap;
 use nalgebra::geometry::Point2;
 use nalgebra::core::Vector3;
-use rand::Rng;
 
 mod wavefront;
 
@@ -130,20 +128,27 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, heig
     }
 }
 
-fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, height: u32) {
+fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: Vector3<f64>) {
     let coordinates = wavefront::Object::new(filename);
 
     for face in coordinates.faces {
         let mut screen_coordinates: Vec<Point2<f64>> = Vec::new();
+        let mut world_coordinates: Vec<Vector3<f64>> = Vec::new();
         for i in 0..3 {
-            let world_coordinates: Vector3<f64> = coordinates.vertices[(face[i] - 1) as usize];
+            let world_coordinate: Vector3<f64> = coordinates.vertices[(face[i] - 1) as usize];
 
-            let pointx = ((world_coordinates.x + 1.0) * width as f64 / 2.0).min(width as f64 - 1.0);
-            let pointy = ((world_coordinates.y + 1.0) * height as f64 / 2.0).min(height as f64 - 1.0);
+            let pointx = ((world_coordinate.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
+            let pointy = ((world_coordinate.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
+            
             screen_coordinates.push(Point2::new(pointx, pointy));
+            world_coordinates.push(world_coordinate);
         }
-        let mut rng = rand::thread_rng();
-        draw_triangle(&screen_coordinates, buffer, image::Rgb([rng.gen::<u8>() % 255, rng.gen::<u8>() % 255, rng.gen::<u8>() % 255]));
+        let normal: Vector3<f64> = (world_coordinates[2] - world_coordinates[0]).cross(&(world_coordinates[1] - world_coordinates[0])).normalize();
+        let intensity = normal.dot(&light_vector);
+
+        if intensity > 0.0 {
+            draw_triangle(&screen_coordinates, buffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
+        }
     }
 }
 
@@ -151,7 +156,8 @@ fn main() {
     let (width, height) = (1600, 1600);
     let mut buffer = image::ImageBuffer::new(width, height);
 
-    draw_triangle_mesh("../porsche.obj", &mut buffer, width, height);
+    let light_vector = Vector3::new(0.0, 0.0, -1.0).normalize();
+    draw_triangle_mesh("../porsche.obj", &mut buffer, light_vector);
 
     let ref mut fout = File::create("../triangle_mesh.png").unwrap();
     image::ImageRgb8(buffer).flipv()

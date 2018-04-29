@@ -6,7 +6,6 @@ authors = ["mandeep <mandeep@users.noreply.github.com>"]
 [dependencies]
 image = "0.18.0"
 nalgebra = "0.14.1"
-rand = "0.4.2"
 
 [profile.dev]
 opt-level = 2
