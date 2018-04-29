@@ -1,8 +1,10 @@
+#![allow(dead_code)]
 extern crate image;
 extern crate nalgebra;
 
 use std::fs::File;
 use std::mem::swap;
+use nalgebra::core::Vector2;
 
 mod wavefront;
 
@@ -89,13 +91,56 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage, width: u32, heig
     }
 }
 
+fn draw_triangle(mut t0: Vector2<f64>, mut t1: Vector2<f64>, mut t2: Vector2<f64>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
+    if t0.y == t1.y && t0.y == t2.y {
+        return;
+    }
+
+    if t0.y > t1.y {
+        swap(&mut t0, &mut t1);
+    }
+    if t0.y > t2.y {
+        swap(&mut t0, &mut t2);
+    }
+    if t1.y > t2.y {
+        swap(&mut t1, &mut t2);
+    }
+
+    let triangle_height: f64 = t2.y - t0.y;
+
+    for i in 0..triangle_height as i32 {
+        let second_half: bool = i > (t1.y - t0.y) as i32 || (t1.y == t0.y);
+        let segment_height = if second_half {t2.y - t1.y} else {t1.y - t0.y};
+        
+        let alpha: f64 = i as f64 / triangle_height;
+        let beta: f64 = if second_half { (i as f64 - (t1.y - t0.y)) / segment_height} else {i as f64 / segment_height};
+
+        let mut a = t0 + ((t2 - t0) * alpha);
+        let mut b = if second_half {t1 + ((t2 - t1) * beta)} else {t0 + ((t1 - t0) * beta)};
+
+        if a.x > b.x {
+            swap(&mut a, &mut b);
+        }
+
+        for j in (a.x as u32)..=(b.x as u32) {
+            buffer.put_pixel(j, t0.y as u32 + i as u32, color);
+        }
+    }
+}
+
 fn main() {
-    let (width, height) = (1600, 1600);
+    let (width, height) = (200, 200);
     let mut buffer = image::ImageBuffer::new(width, height);
 
-    draw_wire_mesh("../head.obj", &mut buffer, width, height);    
+    let t0 = vec![Vector2::new(10.0, 70.0), Vector2::new(50.0, 160.0), Vector2::new(70.0, 80.0)]; 
+    let t1 = vec![Vector2::new(180.0, 50.0), Vector2::new(150.0, 1.0), Vector2::new(70.0, 180.0)]; 
+    let t2 = vec![Vector2::new(180.0, 150.0), Vector2::new(120.0, 160.0), Vector2::new(130.0, 180.0)]; 
 
-    let ref mut fout = File::create("../wire_mesh.png").unwrap();
+    draw_triangle(t0[0], t0[1], t0[2], &mut buffer, image::Rgb([255, 0, 0]));    
+    draw_triangle(t1[0], t1[1], t1[2], &mut buffer, image::Rgb([255, 255, 255]));    
+    draw_triangle(t2[0], t2[1], t2[2], &mut buffer, image::Rgb([0, 255, 0]));    
+
+    let ref mut fout = File::create("../triangle.png").unwrap();
     image::ImageRgb8(buffer).flipv()
                             .save(fout, image::PNG)
                             .unwrap();
