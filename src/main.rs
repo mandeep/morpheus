@@ -137,10 +137,10 @@ fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector
         for i in 0..3 {
             let world_coordinate: Vector3<f64> = coordinates.vertices[(face[i] - 1) as usize];
 
-            let pointx = ((world_coordinate.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
-            let pointy = ((world_coordinate.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
+            let x = ((world_coordinate.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
+            let y = ((world_coordinate.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
             
-            screen_coordinates.push(Point2::new(pointx, pointy));
+            screen_coordinates.push(Point2::new(x, y));
             world_coordinates.push(world_coordinate);
         }
         let normal: Vector3<f64> = (world_coordinates[2] - world_coordinates[0]).cross(&(world_coordinates[1] - world_coordinates[0])).normalize();
