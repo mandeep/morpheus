@@ -4,7 +4,7 @@ extern crate nalgebra;
 
 use std::fs::File;
 use std::mem::swap;
-use nalgebra::geometry::Point2;
+use nalgebra::geometry::{Point2, Point3};
 use nalgebra::core::{Vector2, Vector3};
 
 mod wavefront;
@@ -95,7 +95,7 @@ fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32
     }
 }
 
-fn find_barycentric(points: &Vec<Point2<f64>>, point: Point2<f64>) -> Vector3<f64> {
+fn find_barycentric(points: &Vec<Vector3<f64>>, point: Point3<f64>) -> Vector3<f64> {
     let u = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
     let v = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
 
@@ -109,7 +109,7 @@ fn find_barycentric(points: &Vec<Point2<f64>>, point: Point2<f64>) -> Vector3<f6
 
 }
 
-fn draw_triangles(points: &Vec<Point2<f64>>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
+fn draw_triangles(points: &Vec<Vector3<f64>>, buffer: &mut image::RgbImage, zbuffer: &mut Vec<f64>, color: image::Rgb<u8>) {
     let mut bounding_box_minimum: Point2<f64> = Point2::new(buffer.width() as f64 - 1.0, buffer.height() as f64 - 1.0);
     let mut bounding_box_maximum: Point2<f64> = Point2::new(0.0, 0.0);
 
@@ -122,10 +122,16 @@ fn draw_triangles(points: &Vec<Point2<f64>>, buffer: &mut image::RgbImage, color
 
     for x in bounding_box_minimum.x as i32 ..= bounding_box_maximum.x as i32 {
         for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
-            let point = Point2::new(x as f64, y as f64);
+            let mut point = Point3::new(x as f64, y as f64, 0.0);
             let barycentric_coordinates: Vector3<f64> = find_barycentric(points, point);
             if barycentric_coordinates.x >= 0.0 && barycentric_coordinates.y >= 0.0 && barycentric_coordinates.z >= 0.0 {
-                buffer.put_pixel(point.x as u32, point.y as u32, color);
+                for i in 0..3 {
+                    point.z += points[i].z * barycentric_coordinates[i];
+                }
+                if zbuffer[(point.x as u32 + (point.y as u32 * buffer.width())) as usize] < point.z {
+                    zbuffer[(point.x as u32 + (point.y as u32 * buffer.width())) as usize] = point.z;
+                    buffer.put_pixel(point.x as u32, point.y as u32, color)
+                }
             }
         }
     }
@@ -161,26 +167,27 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
     }
 }
 
-fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: Vector3<f64>) {
+fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: Vector3<f64>, zbuffer: &mut Vec<f64>) {
     let coordinates = wavefront::Object::new(filename);
 
     for face in coordinates.faces {
-        let mut screen_coordinates: Vec<Point2<f64>> = Vec::new();
+        let mut screen_coordinates: Vec<Vector3<f64>> = Vec::new();
         let mut world_coordinates: Vec<Vector3<f64>> = Vec::new();
         for i in 0..3 {
             let world_coordinate: Vector3<f64> = coordinates.vertices[(face[i] - 1) as usize];
 
             let x = ((world_coordinate.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
             let y = ((world_coordinate.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
-            
-            screen_coordinates.push(Point2::new(x, y));
+            let z = world_coordinate.z;
+
+            screen_coordinates.push(Vector3::new(x, y, z));
             world_coordinates.push(world_coordinate);
         }
         let normal: Vector3<f64> = (world_coordinates[2] - world_coordinates[0]).cross(&(world_coordinates[1] - world_coordinates[0])).normalize();
         let intensity: f64 = normal.dot(&light_vector);
 
         if intensity > 0.0 {
-            draw_triangles(&screen_coordinates, buffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
+            draw_triangles(&screen_coordinates, buffer, zbuffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
         }
     }
 }
@@ -190,7 +197,8 @@ fn main() {
     let mut buffer = image::ImageBuffer::new(width, height);
 
     let light_vector = Vector3::new(0.0, 0.0, -1.0).normalize();
-    draw_triangle_mesh("../porsche.obj", &mut buffer, light_vector);
+    let mut zbuffer = vec![-1.0; (width * height * 2) as usize];
+    draw_triangle_mesh("../porsche.obj", &mut buffer, light_vector, &mut zbuffer);
 
     let ref mut fout = File::create("../triangle_mesh.png").unwrap();
     image::ImageRgb8(buffer).flipv()
