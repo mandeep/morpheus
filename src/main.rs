@@ -95,7 +95,7 @@ fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32
     }
 }
 
-fn find_barycentric(points: &Vec<Vector3<f64>>, point: Point3<f64>) -> Vector3<f64> {
+fn find_barycentric(points: &Vec<Vector3<f64>>, point: &Point3<f64>) -> Vector3<f64> {
     let u = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
     let v = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
 
@@ -123,7 +123,7 @@ fn draw_triangles(points: &Vec<Vector3<f64>>, buffer: &mut image::RgbImage, zbuf
     for x in bounding_box_minimum.x as i32 ..= bounding_box_maximum.x as i32 {
         for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
             let mut point = Point3::new(x as f64, y as f64, 0.0);
-            let barycentric_coordinates: Vector3<f64> = find_barycentric(points, point);
+            let barycentric_coordinates: Vector3<f64> = find_barycentric(points, &point);
             if barycentric_coordinates.x >= 0.0 && barycentric_coordinates.y >= 0.0 && barycentric_coordinates.z >= 0.0 {
                 for i in 0..3 {
                     point.z += points[i].z * barycentric_coordinates[i];
@@ -167,7 +167,7 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
     }
 }
 
-fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: Vector3<f64>) {
+fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: &Vector3<f64>) {
     let coordinates = wavefront::Object::new(filename);
     let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
 
@@ -199,7 +199,7 @@ fn main() {
 
     let light_vector = Vector3::new(0.0, 0.0, -1.0).normalize();
     
-    draw_triangle_mesh("../porsche.obj", &mut buffer, light_vector);
+    draw_triangle_mesh("../porsche.obj", &mut buffer, &light_vector);
 
     let ref mut fout = File::create("../triangle_mesh.png").unwrap();
     image::ImageRgb8(buffer).flipv()
