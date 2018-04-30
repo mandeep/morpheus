@@ -151,10 +151,10 @@ fn draw_triangles(points: &Vec<Vector3<f64>>, buffer: &mut image::RgbImage, zbuf
 fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
     let coordinates = wavefront::Object::new(filename);
 
-    for face in coordinates.faces {
+    for face in coordinates.geometric_faces {
         for i in 0..3 {
-            let v0 = coordinates.vertices[(face[i] - 1) as usize];
-            let v1 = coordinates.vertices[(face[(i+1) % 3] - 1) as usize];
+            let v0 = coordinates.geometric_vertices[(face[i] - 1) as usize];
+            let v1 = coordinates.geometric_vertices[(face[(i+1) % 3] - 1) as usize];
             
             let x0 = ((v0.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
             let y0 = ((v0.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
@@ -169,13 +169,13 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
 
 fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: Vector3<f64>) {
     let coordinates = wavefront::Object::new(filename);
-    let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height() * 2) as usize];
+    let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
 
-    for face in coordinates.faces {
+    for face in coordinates.geometric_faces {
         let mut screen_coordinates: Vec<Vector3<f64>> = Vec::new();
         let mut world_coordinates: Vec<Vector3<f64>> = Vec::new();
         for i in 0..3 {
-            let world_coordinate: Vector3<f64> = coordinates.vertices[(face[i] - 1) as usize];
+            let world_coordinate: Vector3<f64> = coordinates.geometric_vertices[(face[i] - 1) as usize];
 
             let x = ((world_coordinate.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
             let y = ((world_coordinate.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
