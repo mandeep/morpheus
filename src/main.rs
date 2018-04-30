@@ -167,8 +167,9 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
     }
 }
 
-fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: Vector3<f64>, zbuffer: &mut Vec<f64>) {
+fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: Vector3<f64>) {
     let coordinates = wavefront::Object::new(filename);
+    let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height() * 2) as usize];
 
     for face in coordinates.faces {
         let mut screen_coordinates: Vec<Vector3<f64>> = Vec::new();
@@ -187,7 +188,7 @@ fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector
         let intensity: f64 = normal.dot(&light_vector);
 
         if intensity > 0.0 {
-            draw_triangles(&screen_coordinates, buffer, zbuffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
+            draw_triangles(&screen_coordinates, buffer, &mut zbuffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
         }
     }
 }
@@ -197,8 +198,8 @@ fn main() {
     let mut buffer = image::ImageBuffer::new(width, height);
 
     let light_vector = Vector3::new(0.0, 0.0, -1.0).normalize();
-    let mut zbuffer = vec![-1.0; (width * height * 2) as usize];
-    draw_triangle_mesh("../porsche.obj", &mut buffer, light_vector, &mut zbuffer);
+    
+    draw_triangle_mesh("../porsche.obj", &mut buffer, light_vector);
 
     let ref mut fout = File::create("../triangle_mesh.png").unwrap();
     image::ImageRgb8(buffer).flipv()
