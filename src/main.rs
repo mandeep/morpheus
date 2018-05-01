@@ -62,6 +62,20 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
     }
 }
 
+/// Draw a filled triangle in the given color with sides t0, t1, and t2
+///
+/// # Examples
+///
+/// ```
+/// let mut buffer = image::ImageBuffer::new(1921, 1081);
+///
+/// let mut t0 = Vector2::new(0, 0);
+/// let mut t1 = Vector2::new(2, 2);
+/// let mut t2 = Vector2::new(0, 2);
+///
+/// draw_line(t0, t1, t2 &mut buffer, image::Rgb([255, 255, 255]))
+/// ```
+///
 fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
     if t0.y > t1.y {
         swap(&mut t0, &mut t1);
@@ -95,16 +109,26 @@ fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32
     }
 }
 
-fn find_barycentric(points: &Vec<Vector3<f64>>, point: &Point3<f64>) -> Vector3<f64> {
+/// Find the barycentric coordinates of the given point with respect to the given triangle
+///
+/// # Examples
+///
+/// ```
+/// let points =  vec![Vector3::new(0, 0, 0), Vector3::new(2, 2, 2), Vector3::new(0, 2, 2)]
+/// let point = Point3::new(1.0, 1.0, 0.0);
+/// let barycentric_coordinates: Point3<f64> = find_barycentric(&points, &point);
+/// ```
+///
+fn find_barycentric(points: &Vec<Vector3<f64>>, point: &Point3<f64>) -> Point3<f64> {
     let u = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
     let v = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
 
     let w = u.cross(&v);
 
     if (w.z).abs() < 1.0 {
-        return Vector3::new(-1.0, 1.0, 1.0);
+        return Point3::new(-1.0, 1.0, 1.0);
     } else {
-        return Vector3::new(1.0 - (w.x + w.y) as f64 / w.z as f64, w.y as f64 / w.z as f64, w.x as f64 / w.z as f64);
+        return Point3::new(1.0 - (w.x + w.y) as f64 / w.z as f64, w.y as f64 / w.z as f64, w.x as f64 / w.z as f64);
     }
 
 }
@@ -123,7 +147,7 @@ fn draw_triangles(points: &Vec<Vector3<f64>>, buffer: &mut image::RgbImage, zbuf
     for x in bounding_box_minimum.x as i32 ..= bounding_box_maximum.x as i32 {
         for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
             let mut point = Point3::new(x as f64, y as f64, 0.0);
-            let barycentric_coordinates: Vector3<f64> = find_barycentric(points, &point);
+            let barycentric_coordinates: Point3<f64> = find_barycentric(points, &point);
             if barycentric_coordinates.x >= 0.0 && barycentric_coordinates.y >= 0.0 && barycentric_coordinates.z >= 0.0 {
                 for i in 0..3 {
                     point.z += points[i].z * barycentric_coordinates[i];
