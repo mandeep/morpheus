@@ -119,7 +119,7 @@ fn fill_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32
 /// let barycentric_coordinates: Point3<f64> = find_barycentric(&points, &point);
 /// ```
 ///
-fn find_barycentric(points: &Vec<Vector3<f64>>, point: &Point3<f64>) -> Point3<f64> {
+fn find_barycentric(points: &Vec<Point3<f64>>, point: &Point3<f64>) -> Point3<f64> {
     let u = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
     let v = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
 
@@ -145,7 +145,7 @@ fn find_barycentric(points: &Vec<Vector3<f64>>, point: &Point3<f64>) -> Point3<f
 /// draw_triangle(&points, &mut buffer, &mut zbuffer, image::Rgb([255, 255, 255]))
 /// ```
 ///
-fn draw_triangle(points: &Vec<Vector3<f64>>, buffer: &mut image::RgbImage, zbuffer: &mut Vec<f64>, color: image::Rgb<u8>) {
+fn draw_triangle(points: &Vec<Point3<f64>>, buffer: &mut image::RgbImage, zbuffer: &mut Vec<f64>, color: image::Rgb<u8>) {
     let mut bounding_box_minimum: Point2<f64> = Point2::new(buffer.width() as f64 - 1.0, buffer.height() as f64 - 1.0);
     let mut bounding_box_maximum: Point2<f64> = Point2::new(0.0, 0.0);
 
@@ -220,16 +220,16 @@ fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector
     let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
 
     for face in coordinates.geometric_faces {
-        let mut screen_coordinates: Vec<Vector3<f64>> = Vec::new();
-        let mut world_coordinates: Vec<Vector3<f64>> = Vec::new();
+        let mut screen_coordinates: Vec<Point3<f64>> = Vec::new();
+        let mut world_coordinates: Vec<Point3<f64>> = Vec::new();
         for i in 0..3 {
-            let world_coordinate: Vector3<f64> = coordinates.geometric_vertices[(face[i] - 1) as usize];
+            let world_coordinate: Point3<f64> = coordinates.geometric_vertices[(face[i] - 1) as usize];
 
             let x = ((world_coordinate.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
             let y = ((world_coordinate.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
             let z = world_coordinate.z;
 
-            screen_coordinates.push(Vector3::new(x, y, z));
+            screen_coordinates.push(Point3::new(x, y, z));
             world_coordinates.push(world_coordinate);
         }
         let normal: Vector3<f64> = (world_coordinates[2] - world_coordinates[0]).cross(&(world_coordinates[1] - world_coordinates[0])).normalize();
