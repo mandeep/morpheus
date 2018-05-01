@@ -62,7 +62,7 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
     }
 }
 
-/// Draw a filled triangle in the given color with sides t0, t1, and t2
+/// Fill triangle in the given color with sides t0, t1, and t2
 ///
 /// # Examples
 ///
@@ -73,10 +73,10 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
 /// let mut t1 = Vector2::new(2, 2);
 /// let mut t2 = Vector2::new(0, 2);
 ///
-/// draw_line(t0, t1, t2 &mut buffer, image::Rgb([255, 255, 255]))
+/// fill_triangle(t0, t1, t2, &mut buffer, image::Rgb([255, 255, 255]))
 /// ```
 ///
-fn draw_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
+fn fill_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
     if t0.y > t1.y {
         swap(&mut t0, &mut t1);
     }
@@ -133,7 +133,19 @@ fn find_barycentric(points: &Vec<Vector3<f64>>, point: &Point3<f64>) -> Point3<f
 
 }
 
-fn draw_triangles(points: &Vec<Vector3<f64>>, buffer: &mut image::RgbImage, zbuffer: &mut Vec<f64>, color: image::Rgb<u8>) {
+/// Draw a filled triangle with the given points in the given color
+///
+/// # Examples
+///
+/// ```
+/// let mut buffer = image::ImageBuffer::new(1921, 1081);
+/// let points =  vec![Vector3::new(0, 0, 0), Vector3::new(2, 2, 2), Vector3::new(0, 2, 2)]
+/// let zbuffer = vec![-1.0, -1.0, -1.0];
+///
+/// draw_triangle(&points, &mut buffer, &mut zbuffer, image::Rgb([255, 255, 255]))
+/// ```
+///
+fn draw_triangle(points: &Vec<Vector3<f64>>, buffer: &mut image::RgbImage, zbuffer: &mut Vec<f64>, color: image::Rgb<u8>) {
     let mut bounding_box_minimum: Point2<f64> = Point2::new(buffer.width() as f64 - 1.0, buffer.height() as f64 - 1.0);
     let mut bounding_box_maximum: Point2<f64> = Point2::new(0.0, 0.0);
 
@@ -191,6 +203,18 @@ fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
     }
 }
 
+/// Draw a triangle mesh on the given ImageBuffer with the illumination provided by the given vector
+///
+/// # Examples
+///
+/// ```
+/// let width = 512;
+/// let height = 512;
+/// let mut buffer = image::ImageBuffer::new(width, height);
+/// let light_vector = Vector3::new(0.0, 0.0, -1.0).normalize();
+///
+/// draw_triangle_mesh("coordinates.obj", &mut buffer, light_vector); 
+/// ```
 fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: &Vector3<f64>) {
     let coordinates = wavefront::Object::new(filename);
     let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
@@ -212,7 +236,7 @@ fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector
         let intensity: f64 = normal.dot(&light_vector);
 
         if intensity > 0.0 {
-            draw_triangles(&screen_coordinates, buffer, &mut zbuffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
+            draw_triangle(&screen_coordinates, buffer, &mut zbuffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
         }
     }
 }
