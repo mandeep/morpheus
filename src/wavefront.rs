@@ -64,9 +64,9 @@ impl Object {
         for line in file.lines().map(|l| l.unwrap()) {
             if line.starts_with("v ") {
                 let v_coordinates = line.split_at(2).1
-                                      .split_whitespace()
-                                      .map(|n| n.parse().unwrap())
-                                      .collect::<Vec<f64>>();
+                                        .split_whitespace()
+                                        .map(|n| n.parse().unwrap())
+                                        .collect::<Vec<f64>>();
 
                 geometric_vertices.push(Point3::new(v_coordinates[0], v_coordinates[1], v_coordinates[2]));
             }
