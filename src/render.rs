@@ -51,11 +51,7 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
         }
         error += derror;
         if error > dx {
-            if y1 > y0 {
-                y += 1;
-            } else {
-                y -= 1;
-            }
+            y += if y1 > y0 { 1 } else { -1 };
             error -= dx * 2;
         }
     }
