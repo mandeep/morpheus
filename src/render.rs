@@ -4,7 +4,7 @@ extern crate nalgebra;
 
 use std::mem::swap;
 use nalgebra::geometry::{Point2, Point3};
-use nalgebra::core::{Vector2, Vector3};
+use nalgebra::core::Vector3;
 
 use wavefront;
 
@@ -57,21 +57,21 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
     }
 }
 
-/// Fill triangle in the given color with sides t0, t1, and t2
+/// Fill triangle in the given color with points t0, t1, and t2
 ///
 /// # Examples
 ///
 /// ```
 /// let mut buffer = image::ImageBuffer::new(1921, 1081);
 ///
-/// let mut t0 = Vector2::new(0, 0);
-/// let mut t1 = Vector2::new(2, 2);
-/// let mut t2 = Vector2::new(0, 2);
+/// let mut t0 = Point2::new(0, 0);
+/// let mut t1 = Point2::new(2, 2);
+/// let mut t2 = Point2::new(0, 2);
 ///
 /// fill_triangle(t0, t1, t2, &mut buffer, image::Rgb([255, 255, 255]))
 /// ```
 ///
-fn fill_triangle(mut t0: Vector2<i32>, mut t1: Vector2<i32>, mut t2: Vector2<i32>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
+fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
     if t0.y > t1.y {
         swap(&mut t0, &mut t1);
     }
