@@ -122,6 +122,20 @@ fn lookat(eye: Vector3<f64>, center: Vector3<f64>, up: Vector3<f64>) -> Matrix4<
     matrix * transpose
 }
 
+fn viewport(x: i32, y: i32, buffer: &mut image::RgbImage) -> Matrix4<f64> {
+    let mut matrix = Matrix4::identity();
+    
+    matrix.row_mut(0)[3] = x as f64 + (buffer.width() as f64 / 2.0);
+    matrix.row_mut(1)[3] = y as f64 + (buffer.height() as f64 / 2.0);
+    matrix.row_mut(2)[3] = 255.0 / 2.0;
+
+    matrix.row_mut(0)[0] = buffer.width() as f64 / 2.0;
+    matrix.row_mut(1)[1] = buffer.height() as f64 / 2.0;
+    matrix.row_mut(2)[2] = 255.0 / 2.0;
+
+    matrix
+}
+
 /// Find the barycentric coordinates of the given point with respect to the given triangle
 ///
 /// # Examples
