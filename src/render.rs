@@ -4,7 +4,7 @@ extern crate nalgebra;
 
 use std::mem::swap;
 use nalgebra::geometry::{Point2, Point3};
-use nalgebra::core::Vector3;
+use nalgebra::core::{Matrix4, Vector3};
 
 use wavefront;
 
@@ -102,6 +102,24 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>, 
             buffer.put_pixel(j, t0.y as u32 + i as u32, color);
         }
     }
+}
+
+fn lookat(eye: Vector3<f64>, center: Vector3<f64>, up: Vector3<f64>) -> Matrix4<f64> {
+    let z = (eye - center).normalize();
+    let x = up.cross(&z).normalize();
+    let y = z.cross(&x).normalize();
+
+    let mut matrix: Matrix4<f64> = Matrix4::identity();
+    let mut transpose: Matrix4<f64> = Matrix4::identity();
+
+    for i in 0..3 {
+        matrix.row_mut(0)[i] = x[i];
+        matrix.row_mut(1)[i] = y[i];
+        matrix.row_mut(2)[i] = z[i];
+        transpose.row_mut(i)[3] = -center[i];
+    }
+
+    matrix * transpose
 }
 
 /// Find the barycentric coordinates of the given point with respect to the given triangle
