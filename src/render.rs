@@ -37,10 +37,10 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
         swap(&mut y0, &mut y1);
     }
 
-    let dx = x1 - x0;
-    let dy = y1 - y0;
+    let delta_x = x1 - x0;
+    let delta_y = y1 - y0;
+    let delta_error = (delta_y * 2).abs();
     let mut y = y0;
-    let derror = (dy * 2).abs();
     let mut error = 0;
 
     for x in x0 ..= x1 {
@@ -49,10 +49,10 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut im
         } else {
             buffer.put_pixel(x as u32, y as u32, color);
         }
-        error += derror;
-        if error > dx {
+        error += delta_error;
+        if error > delta_x {
             y += if y1 > y0 { 1 } else { -1 };
-            error -= dx * 2;
+            error -= delta_x * 2;
         }
     }
 }
