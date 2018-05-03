@@ -27,7 +27,8 @@ pub struct Object {
     pub geometric_vertices: Vec<Point3<f64>>,
     pub geometric_faces: Vec<Vec<i32>>,
     pub texture_vertices: Vec<Point2<f64>>,
-    pub texture_faces: Vec<Vec<i32>>
+    pub texture_faces: Vec<Vec<i32>>,
+    pub normal_vertices: Vec<Point3<f64>>
 }
 
 
@@ -60,6 +61,7 @@ impl Object {
         let mut geometric_faces: Vec<Vec<i32>> = Vec::new();
         let mut texture_vertices: Vec<Point2<f64>> = Vec::new();
         let mut texture_faces: Vec<Vec<i32>> = Vec::new();
+        let mut normal_vertices: Vec<Point3<f64>> = Vec::new();
 
         for line in file.lines().map(|l| l.unwrap()) {
             if line.starts_with("v ") {
@@ -78,6 +80,14 @@ impl Object {
 
                 texture_vertices.push(Point2::new(vt_coordinates[0], vt_coordinates[1]));
             }
+            else if line.starts_with("vn ") {
+                let vn_coordinates = line.split_at(3).1
+                                         .split_whitespace()
+                                         .map(|n| n.parse().unwrap())
+                                         .collect::<Vec<f64>>();
+
+                normal_vertices.push(Point3::new(vn_coordinates[0], vn_coordinates[1], vn_coordinates[2]));
+            }
             else if line.starts_with("f ") {            
                 let f_coordinates = line.split_at(2).1
                                         .split(|c| c == '/' || c == ' ')
@@ -89,6 +99,7 @@ impl Object {
             }
         }
         Object { geometric_vertices: geometric_vertices, geometric_faces: geometric_faces,
-                 texture_vertices: texture_vertices, texture_faces: texture_faces }
+                 texture_vertices: texture_vertices, texture_faces: texture_faces,
+                 normal_vertices: normal_vertices }
     }
 }
