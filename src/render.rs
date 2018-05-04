@@ -122,16 +122,16 @@ fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> Matri
     matrix * transpose
 }
 
-fn viewport(x: u32, y: u32, width: u32, height: u32) -> Matrix4<f64> {
+fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<f64> {
     let mut matrix = Matrix4::identity();
     
     matrix.row_mut(0)[3] = x as f64 + (width as f64 / 2.0);
     matrix.row_mut(1)[3] = y as f64 + (height as f64 / 2.0);
-    matrix.row_mut(2)[3] = 255.0 / 2.0;
+    matrix.row_mut(2)[3] = depth as f64 / 2.0;
 
     matrix.row_mut(0)[0] = width as f64 / 2.0;
     matrix.row_mut(1)[1] = height as f64 / 2.0;
-    matrix.row_mut(2)[2] = 255.0 / 2.0;
+    matrix.row_mut(2)[2] = depth as f64 / 2.0;
 
     matrix
 }
@@ -248,7 +248,7 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, eye: &Ve
     let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
     let model_view : Matrix4<f64> = lookat(&eye, &center, &Vector3::new(0.0, 1.0, 0.0));
     let projection: Matrix4<f64> = Matrix4::identity();
-    let view_port: Matrix4<f64> = viewport(buffer.width() / 8, buffer.height() / 8, buffer.width() * 3 / 4, buffer.height() * 3 / 4);
+    let view_port: Matrix4<f64> = viewport(buffer.width() / 8, buffer.height() / 8, buffer.width() * 3 / 4, buffer.height() * 3 / 4, 255);
 
     for face in coordinates.geometric_faces {
         let mut screen_coordinates: Vec<Point3<f64>> = Vec::new();
