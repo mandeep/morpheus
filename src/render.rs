@@ -242,13 +242,10 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
 ///
 /// draw_triangle_mesh("coordinates.obj", &mut buffer, light_vector); 
 /// ```
-pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, eye: &Vector3<f64>, center: &Vector3<f64>, light_vector: &Vector3<f64>) {
+pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: &Vector3<f64>) {
     let coordinates = wavefront::Object::new(filename);
     
     let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
-    let model_view : Matrix4<f64> = lookat(&eye, &center, &Vector3::new(0.0, 1.0, 0.0));
-    let projection: Matrix4<f64> = Matrix4::identity();
-    let view_port: Matrix4<f64> = viewport(buffer.width() / 8, buffer.height() / 8, buffer.width() * 3 / 4, buffer.height() * 3 / 4, 255);
 
     for face in coordinates.geometric_faces {
         let mut screen_coordinates: Vec<Point3<f64>> = Vec::new();
