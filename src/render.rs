@@ -125,8 +125,8 @@ fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> Matri
 fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<f64> {
     let mut matrix = Matrix4::identity();
     
-    matrix.row_mut(0)[3] = x as f64 + (width as f64 / 2.0);
-    matrix.row_mut(1)[3] = y as f64 + (height as f64 / 2.0);
+    matrix.row_mut(0)[3] = (x as f64 + (width as f64 / 2.0)).min(width as f64 - 1.0);
+    matrix.row_mut(1)[3] = (y as f64 + (height as f64 / 2.0)).min(height as f64 - 1.0);
     matrix.row_mut(2)[3] = depth as f64 / 2.0;
 
     matrix.row_mut(0)[0] = width as f64 / 2.0;
