@@ -104,6 +104,12 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>, 
     }
 }
 
+/// Change the frame of reference of the viewer
+///
+/// The eye vector is where the camera is situated. The center
+/// vector is where the camera should point in relation to
+/// the up vector which is vertical when rendered.
+///
 fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> Matrix4<f64> {
     let z = (eye - center).normalize();
     let x = up.cross(&z).normalize();
