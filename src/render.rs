@@ -129,6 +129,10 @@ fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> Matri
 }
 
 /// Map the bi-unit cube of [-1, 1] * [-1, 1] * [-1, 1] to the dimensions of the image
+///
+/// The x and y parameters specify the origin of the viewport while the
+/// width and height parameters specify the width and height of the viewport.
+///
 fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<f64> {
     let mut matrix = Matrix4::identity();
     
