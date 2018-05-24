@@ -9,9 +9,14 @@ mod render;
 
 
 fn main() {
-    let (width, height) = (1600, 1600);
+    let (width, height, depth) = (1600, 1600, 255);
+
     let mut buffer = image::ImageBuffer::new(width, height);
 
+
+    let eye = Vector3::new(1.0, 1.0, 3.0);
+    let center = Vector3::new(0.0, 0.0, 0.0);
+    let up = Vector3::new(0.0, 1.0, 0.0);
     let light_vector = Vector3::new(0.0, 0.0, -1.0).normalize();
     
     render::draw_triangle_mesh("../porsche.obj", &mut buffer, &light_vector);
