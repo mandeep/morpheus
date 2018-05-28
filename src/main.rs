@@ -6,6 +6,7 @@ use nalgebra::core::Vector3;
 
 mod wavefront;
 mod render;
+mod vector;
 
 
 fn main() {
@@ -18,8 +19,8 @@ fn main() {
     let center = Vector3::new(0.0, 0.0, 0.0);
     let up = Vector3::new(0.0, 1.0, 0.0);
     let light_vector = Vector3::new(0.0, 0.0, -1.0).normalize();
-    
-    render::draw_triangle_mesh("../porsche.obj", &mut buffer, &light_vector);
+
+    render::draw_triangle_mesh("../porsche.obj", &mut buffer, depth, &light_vector, &eye, &center, &up);
 
     let ref mut fout = File::create("../triangle_mesh.png").unwrap();
     image::ImageRgb8(buffer).flipv()
