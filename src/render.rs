@@ -7,6 +7,7 @@ use nalgebra::geometry::{Point2, Point3};
 use nalgebra::core::{Matrix4, Vector3};
 
 use wavefront;
+use vector;
 
 
 /// Bresenham's algorithm: Draw a line in the given color from (x0, y0) to (x1, y1)
@@ -253,22 +254,25 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
 ///
 /// draw_triangle_mesh("coordinates.obj", &mut buffer, light_vector); 
 /// ```
-pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, light_vector: &Vector3<f64>) {
+pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, depth: u32, light_vector: &Vector3<f64>, eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) {
     let coordinates = wavefront::Object::new(filename);
     
     let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
 
+    let model_view = lookat(eye, center, up);
+    let mut projection: Matrix4<f64> = Matrix4::identity();
+    let view_port = viewport(buffer.width() / 8, buffer.height() / 8, buffer.width() * 3 / 4, buffer.height() * 3 / 4, depth);
+
+    projection.row_mut(3)[2] = -1.0 / (eye - center).norm();
+
     for face in coordinates.geometric_faces {
         let mut screen_coordinates: Vec<Point3<f64>> = Vec::new();
         let mut world_coordinates: Vec<Point3<f64>> = Vec::new();
+
         for i in 0..3 {
             let world_coordinate: Point3<f64> = coordinates.geometric_vertices[(face[i] - 1) as usize];
 
-            let x = ((world_coordinate.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
-            let y = ((world_coordinate.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
-            let z = world_coordinate.z;
-
-            screen_coordinates.push(Point3::new(x, y, z));
+            screen_coordinates.push(vector::vectorize(view_port * projection * model_view * vector::matricize(world_coordinate)));
             world_coordinates.push(world_coordinate);
         }
         let normal: Vector3<f64> = (world_coordinates[2] - world_coordinates[0]).cross(&(world_coordinates[1] - world_coordinates[0])).normalize();
