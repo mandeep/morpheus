@@ -27,12 +27,12 @@ use vector;
 /// ```
 fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
     let steep = (x0 - x1).abs() < (y0 - y1).abs();
-    
+
     if steep {
         swap(&mut x0, &mut y0);
         swap(&mut x1, &mut y1);
     }
-    
+
     if x0 > x1 {
         swap(&mut x0, &mut x1);
         swap(&mut y0, &mut y1);
@@ -88,7 +88,7 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>, 
     for i in 0..triangle_height as i32 {
         let second_half = i > (t1.y - t0.y) as i32 || (t1.y == t0.y);
         let segment_height = if second_half {t2.y - t1.y} else {t1.y - t0.y};
-        
+
         let alpha = i as f64 / triangle_height as f64;
         let beta = if second_half { (i as f64 - (t1.y - t0.y) as f64) / segment_height as f64} else {i as f64 / segment_height as f64};
 
@@ -136,9 +136,9 @@ fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> Matri
 ///
 fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<f64> {
     let mut matrix = Matrix4::identity();
-    
-    matrix.row_mut(0)[3] = (x as f64 + (width as f64 / 2.0)).min(width as f64 - 1.0);
-    matrix.row_mut(1)[3] = (y as f64 + (height as f64 / 2.0)).min(height as f64 - 1.0);
+
+    matrix.row_mut(0)[3] = x as f64 + width as f64 / 2.0;
+    matrix.row_mut(1)[3] = y as f64 + height as f64 / 2.0;
     matrix.row_mut(2)[3] = depth as f64 / 2.0;
 
     matrix.row_mut(0)[0] = width as f64 / 2.0;
@@ -221,7 +221,7 @@ fn draw_triangle(points: &Vec<Point3<f64>>, buffer: &mut image::RgbImage, zbuffe
 /// let height = 512;
 /// let mut buffer = image::ImageBuffer::new(width, height);
 ///
-/// draw_wire_mesh("coordinates.obj", &mut buffer); 
+/// draw_wire_mesh("coordinates.obj", &mut buffer);
 /// ```
 pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
     let coordinates = wavefront::Object::new(filename);
@@ -230,13 +230,13 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
         for i in 0..3 {
             let v0 = coordinates.geometric_vertices[(face[i] - 1) as usize];
             let v1 = coordinates.geometric_vertices[(face[(i+1) % 3] - 1) as usize];
-            
+
             let x0 = ((v0.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
             let y0 = ((v0.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
-            
+
             let x1 = ((v1.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
             let y1 = ((v1.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
-            
+
             draw_line(x0 as i32, y0 as i32, x1 as i32, y1 as i32, buffer, image::Rgb([255, 255, 255]));
         }
     }
@@ -252,11 +252,11 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
 /// let mut buffer = image::ImageBuffer::new(width, height);
 /// let light_vector = Vector3::new(0.0, 0.0, -1.0).normalize();
 ///
-/// draw_triangle_mesh("coordinates.obj", &mut buffer, light_vector); 
+/// draw_triangle_mesh("coordinates.obj", &mut buffer, light_vector);
 /// ```
 pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, depth: u32, light_vector: &Vector3<f64>, eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) {
     let coordinates = wavefront::Object::new(filename);
-    
+
     let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
 
     let model_view = lookat(eye, center, up);
@@ -271,10 +271,12 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, depth: u
 
         for i in 0..3 {
             let world_coordinate: Point3<f64> = coordinates.geometric_vertices[(face[i] - 1) as usize];
-
-            screen_coordinates.push(vector::vectorize(view_port * projection * model_view * vector::matricize(world_coordinate)));
+            let screen_coordinate = vector::vectorize(view_port * projection * model_view * vector::matricize(world_coordinate));
+            println!("{:?}", screen_coordinate);
+            screen_coordinates.push(screen_coordinate);
             world_coordinates.push(world_coordinate);
         }
+
         let normal: Vector3<f64> = (world_coordinates[2] - world_coordinates[0]).cross(&(world_coordinates[1] - world_coordinates[0])).normalize();
         let intensity: f64 = normal.dot(&light_vector);
 

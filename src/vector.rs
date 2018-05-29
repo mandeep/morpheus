@@ -11,8 +11,10 @@ pub fn vectorize(matrix: Matrix4<f64>) -> Point3<f64> {
 
 
 pub fn matricize(point: Point3<f64>) -> Matrix4<f64> {
-    Matrix4::new(point.x, 0.0, 0.0, 0.0,
-                 point.y, 0.0, 0.0, 0.0,
-                 point.z, 0.0, 0.0, 0.0,
-                 0.0, 0.0, 0.0, 0.0)
+    let mut matrix: Matrix4<f64> = Matrix4::identity();
+    matrix.row_mut(0)[0] = point.x;
+    matrix.row_mut(1)[0] = point.y;
+    matrix.row_mut(2)[0] = point.y;
+
+    matrix
 }
