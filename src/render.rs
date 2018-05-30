@@ -272,6 +272,7 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, depth: u
         for i in 0..3 {
             let world_coordinate: Point3<f64> = coordinates.geometric_vertices[(face[i] - 1) as usize];
             let screen_coordinate = vector::vectorize(view_port * projection * model_view * vector::matricize(world_coordinate));
+
             screen_coordinates.push(screen_coordinate);
             world_coordinates.push(world_coordinate);
         }
@@ -279,8 +280,6 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, depth: u
         let normal: Vector3<f64> = (world_coordinates[2] - world_coordinates[0]).cross(&(world_coordinates[1] - world_coordinates[0])).normalize();
         let intensity: f64 = normal.dot(&light_vector);
 
-        if intensity > 0.0 {
-            draw_triangle(&screen_coordinates, buffer, &mut zbuffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
-        }
+        draw_triangle(&screen_coordinates, buffer, &mut zbuffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
     }
 }
