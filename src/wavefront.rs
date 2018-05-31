@@ -17,7 +17,7 @@ use nalgebra::geometry::{Point2, Point3};
 ///
 /// ```
 /// let coordinates = wavefront::Object::new("file.obj");
-/// 
+///
 /// for geometric_vertex in coordinates.geometric_vertices {
 ///     // do something with the vertices
 /// }
@@ -28,7 +28,8 @@ pub struct Object {
     pub geometric_faces: Vec<Vec<i32>>,
     pub texture_vertices: Vec<Point2<f64>>,
     pub texture_faces: Vec<Vec<i32>>,
-    pub normal_vertices: Vec<Point3<f64>>
+    pub normal_vertices: Vec<Point3<f64>>,
+    pub normal_faces: Vec<Vec<i32>>
 }
 
 
@@ -49,7 +50,7 @@ impl Object {
     ///
     /// ```
     /// let coordinates = wavefront::Object::new("file.obj");
-    /// 
+    ///
     /// for geometric_face in coordinates.geometric_faces {
     ///     // do something with the faces
     /// }
@@ -62,6 +63,7 @@ impl Object {
         let mut texture_vertices: Vec<Point2<f64>> = Vec::new();
         let mut texture_faces: Vec<Vec<i32>> = Vec::new();
         let mut normal_vertices: Vec<Point3<f64>> = Vec::new();
+        let mut normal_faces: Vec<Vec<i32>> = Vec::new();
 
         for line in file.lines().map(|l| l.unwrap()) {
             if line.starts_with("v ") {
@@ -88,18 +90,19 @@ impl Object {
 
                 normal_vertices.push(Point3::new(vn_coordinates[0], vn_coordinates[1], vn_coordinates[2]));
             }
-            else if line.starts_with("f ") {            
+            else if line.starts_with("f ") {
                 let f_coordinates = line.split_at(2).1
                                         .split(|c| c == '/' || c == ' ')
                                         .map(|n| n.parse().unwrap())
                                         .collect::<Vec<i32>>();
-    
+
                 geometric_faces.push(vec![f_coordinates[0], f_coordinates[3], f_coordinates[6]]);
                 texture_faces.push(vec![f_coordinates[1], f_coordinates[4], f_coordinates[7]]);
+                normal_faces.push(vec![f_coordinates[2], f_coordinates[5], f_coordinates[8]]);
             }
         }
         Object { geometric_vertices: geometric_vertices, geometric_faces: geometric_faces,
                  texture_vertices: texture_vertices, texture_faces: texture_faces,
-                 normal_vertices: normal_vertices }
+                 normal_vertices: normal_vertices, normal_faces: normal_faces }
     }
 }
