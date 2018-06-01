@@ -1,13 +1,14 @@
 extern crate image;
 extern crate nalgebra;
 
-use std::fs::File;
 use std::env;
+use std::fs::File;
+
 use nalgebra::core::Vector3;
 
-mod wavefront;
 mod render;
 mod vector;
+mod wavefront;
 
 
 fn main() {

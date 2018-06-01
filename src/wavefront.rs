@@ -1,8 +1,9 @@
 extern crate nalgebra;
 
-use std::io::prelude::*;
-use std::io::BufReader;
 use std::fs::File;
+use std::io::BufReader;
+use std::io::prelude::*;
+
 use nalgebra::geometry::{Point2, Point3};
 
 

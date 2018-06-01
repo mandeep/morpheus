@@ -1,8 +1,7 @@
-extern crate image;
 extern crate nalgebra;
 
-use nalgebra::geometry::Point3;
 use nalgebra::core::Matrix4x1;
+use nalgebra::geometry::Point3;
 
 
 /// Project 4D coordinates into 3D by dividing the x, y, and z coordinate by the w coordinate

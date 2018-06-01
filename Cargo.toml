@@ -1,6 +1,6 @@
 [package]
 name = "morpheus"
-version = "0.5.2"
+version = "0.5.3"
 authors = ["mandeep <mandeep@users.noreply.github.com>"]
 
 [dependencies]

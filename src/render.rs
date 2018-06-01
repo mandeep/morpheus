@@ -3,8 +3,9 @@ extern crate image;
 extern crate nalgebra;
 
 use std::mem::swap;
-use nalgebra::geometry::{Point2, Point3};
+
 use nalgebra::core::{Matrix4, Vector3};
+use nalgebra::geometry::{Point2, Point3};
 
 use wavefront;
 use vector;
