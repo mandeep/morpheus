@@ -12,8 +12,6 @@ mod vector;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let input_file = &args[1];
-    let output_file = &args[2];
 
     let (width, height, depth) = (1600, 1600, 255);
 
@@ -24,9 +22,9 @@ fn main() {
     let up = Vector3::new(0.0, 1.0, 0.0);
     let light_vector = Vector3::new(5.0, 5.0, 20.0).normalize();
 
-    render::draw_triangle_mesh(input_file, &mut buffer, depth, &light_vector, &eye, &center, &up);
+    render::draw_triangle_mesh(&args[1], &mut buffer, depth, &light_vector, &eye, &center, &up);
 
-    let ref mut fout = File::create(output_file).unwrap();
+    let ref mut fout = File::create(&args[2]).unwrap();
     image::ImageRgb8(buffer).flipv()
                             .save(fout, image::PNG)
                             .unwrap();
