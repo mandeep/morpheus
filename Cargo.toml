@@ -1,5 +1,5 @@
 [package]
-name = "raw-renderer"
+name = "morpheus"
 version = "0.1.0"
 authors = ["mandeep <mandeep@users.noreply.github.com>"]
 

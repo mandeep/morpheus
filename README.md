@@ -1,5 +1,5 @@
 ![Raw-Renderer](renderer.png)
-[![Travis branch](https://img.shields.io/travis/mandeep/raw-renderer/master.svg?style=flat-square)](https://travis-ci.org/mandeep/raw-renderer)
+[![Travis branch](https://img.shields.io/travis/mandeep/morpheus/master.svg?style=flat-square)](https://travis-ci.org/mandeep/morpheus)
 =============================
 
 Raw Renderer is a Rust implementation of a minimal renderer
