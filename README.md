@@ -1,8 +1,8 @@
-![Raw-Renderer](renderer.png)
-[![Travis branch](https://img.shields.io/travis/mandeep/morpheus/master.svg?style=flat-square)](https://travis-ci.org/mandeep/morpheus)
+![Rastermind](renderer.png)
+[![Travis branch](https://img.shields.io/travis/mandeep/rastermind/master.svg?style=flat-square)](https://travis-ci.org/mandeep/rastermind)
 =============================
 
-Morpheus is a Rust implementation of a minimal renderer
+Rastermind is a Rust implementation of a renderer
 based on the [Tiny Renderer](https://github.com/ssloy/tinyrenderer/) wiki course.
 
 ![Wire Mesh](wire_mesh.png)
