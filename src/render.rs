@@ -130,6 +130,15 @@ fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> Matri
     matrix * transpose
 }
 
+/// Create a projection matrix
+fn projection(coefficient: f64) -> Matrix4<f64> {
+    let mut matrix: Matrix4<f64> = Matrix4::identity();
+    matrix.row_mut(3)[2] = coefficient;
+
+    matrix
+
+}
+
 /// Map the bi-unit cube of [-1, 1] * [-1, 1] * [-1, 1] to the dimensions of the image
 ///
 /// The x and y parameters specify the origin of the viewport while the
@@ -261,10 +270,8 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, depth: u
     let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
 
     let model_view = lookat(eye, center, up);
-    let mut projection: Matrix4<f64> = Matrix4::identity();
+    let projection = projection(-1.0 / (eye - center).norm());
     let view_port = viewport(buffer.width() / 8, buffer.height() / 8, buffer.width() * 3 / 4, buffer.height() * 3 / 4, depth);
-
-    projection.row_mut(3)[2] = -1.0 / (eye - center).norm();
 
     for face in coordinates.geometric_faces {
         let mut screen_coordinates: Vec<Point3<f64>> = Vec::new();
