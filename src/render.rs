@@ -279,7 +279,7 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, depth: u
 
         for i in 0..3 {
             let world_coordinate: Point3<f64> = coordinates.geometric_vertices[(face[i] - 1) as usize];
-            let screen_coordinate = vector::project3(view_port * projection * model_view * vector::vectorize4(world_coordinate));
+            let screen_coordinate: Point3<f64> = vector::project3(view_port * projection * model_view * vector::vectorize4(world_coordinate));
 
             screen_coordinates.push(screen_coordinate);
             world_coordinates.push(world_coordinate);
