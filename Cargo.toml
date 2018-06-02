@@ -1,6 +1,6 @@
 [package]
 name = "rastermind"
-version = "0.5.4"
+version = "0.5.5"
 authors = ["mandeep <mandeep@users.noreply.github.com>"]
 
 [dependencies]

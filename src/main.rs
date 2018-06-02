@@ -26,6 +26,7 @@ fn main() {
     render::draw_triangle_mesh(&args[1], &mut buffer, depth, &light_vector, &eye, &center, &up);
 
     let ref mut fout = File::create(&args[2]).unwrap();
+
     image::ImageRgb8(buffer).flipv()
                             .save(fout, image::PNG)
                             .unwrap();

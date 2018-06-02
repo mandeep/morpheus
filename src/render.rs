@@ -284,3 +284,47 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, depth: u
         draw_triangle(&screen_coordinates, buffer, &mut zbuffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use std::env;
+    use std::fs::File;
+    use super::*;
+
+    #[test]
+    fn test_draw_line() {
+        let mut dir = env::temp_dir();
+        dir.push("test_draw_line.png");
+
+        let (width, height) = (1600, 1600);
+
+        let mut buffer = image::ImageBuffer::new(width, height);
+
+        draw_line(0, 0, 800, 800, &mut buffer, image::Rgb([255, 255, 255]));
+        draw_line(137, 450, 879, 299, &mut buffer, image::Rgb([255, 255, 255]));
+        draw_line(435, 532, 17, 743, &mut buffer, image::Rgb([255, 255, 255]));
+        draw_line(164, 57, 1, 1045, &mut buffer, image::Rgb([255, 255, 255]));
+        draw_line(1300, 45, 800, 900, &mut buffer, image::Rgb([255, 255, 255]));
+        draw_line(1500, 1599, 0, 1590, &mut buffer, image::Rgb([255, 255, 255]));
+        draw_line(1400, 409, 1500, 900, &mut buffer, image::Rgb([255, 255, 255]));
+
+        let ref mut fout = File::create(&dir).unwrap();
+
+        image::ImageRgb8(buffer).flipv()
+                                .save(fout, image::PNG)
+                                .unwrap();
+
+        // test must be run in the project root directory
+        let test_file = image::open("./tests/test_lines.png").unwrap().to_rgb();
+        let output_file = image::open(&dir).unwrap().to_rgb();
+
+        assert_eq!(test_file.height(), output_file.height());
+
+        for x in 0..1599 {
+            for y in 0..799 {
+                assert_eq!(test_file.get_pixel(x, y), output_file.get_pixel(x, y));
+            }
+        }
+    }
+}
