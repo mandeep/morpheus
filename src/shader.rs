@@ -10,11 +10,11 @@ struct GoraudShader {
 
 
 impl GoraudShader {
-    fn vertex(face_index: u32, vertex_index: u32) {
+    fn vertex(face_index: usize, vertex_index: usize) {
 
     }
 
-    fn fragment(barycentric: Vector3<f64>, color: image::Rgb<u8>) {
+    fn fragment(pixel: Vector3<f64>, color: image::Rgb<u8>) {
 
     }
 }
