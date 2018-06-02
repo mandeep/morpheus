@@ -8,7 +8,7 @@ mod wavefront;
 
 
 struct GoraudShader {
-    pub varying_intensity: Vector3<f64>,
+    varying_intensity: Vector3<f64>,
 }
 
 
