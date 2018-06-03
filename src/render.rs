@@ -18,13 +18,13 @@ use vector;
 /// ```
 /// let mut buffer = image::ImageBuffer::new(1921, 1081);
 ///
-/// line(0, 0, 1920, 1080, &mut buffer, image::Rgb([255, 255, 255]))
+/// draw_line(0, 0, 1920, 1080, &mut buffer, image::Rgb([255, 255, 255]))
 /// ```
 ///
 /// ```
 /// let mut buffer = image::ImageBuffer::new(512, 512);
 ///
-/// line(0, 0, 511, 511, &mut buffer, image::Rgb([128, 0, 255]))
+/// draw_line(0, 0, 511, 511, &mut buffer, image::Rgb([128, 0, 255]))
 /// ```
 fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32, buffer: &mut image::RgbImage, color: image::Rgb<u8>) {
     let steep = (x0 - x1).abs() < (y0 - y1).abs();
