@@ -327,4 +327,34 @@ mod tests {
             }
         }
     }
+
+
+    #[test]
+    fn test_fill_triangle() {
+        let mut dir = env::temp_dir();
+        dir.push("test_fill_triangle.png");
+
+        let (width, height) = (1600, 1600);
+
+        let mut buffer = image::ImageBuffer::new(width, height);
+
+        fill_triangle(Point2::new(0, 0), Point2::new(343, 499), Point2::new(1135, 1478), &mut buffer, image::Rgb([255, 255, 255]));
+
+        let ref mut fout = File::create(&dir).unwrap();
+
+        image::ImageRgb8(buffer).flipv()
+                                .save(fout, image::PNG)
+                                .unwrap();
+
+        let test_file = image::open("./tests/test_triangle.png").unwrap().to_rgb();
+        let output_file = image::open(&dir).unwrap().to_rgb();
+
+        assert_eq!(test_file.height(), output_file.height());
+
+        for x in 0..1599 {
+            for y in 0..1599 {
+                assert_eq!(test_file.get_pixel(x, y), output_file.get_pixel(x, y));
+            }
+        }
+    }
 }
