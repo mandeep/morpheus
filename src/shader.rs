@@ -7,12 +7,12 @@ mod vector;
 mod wavefront;
 
 
-struct GoraudShader {
+struct GouraudShader {
     varying_intensity: Vector3<f64>,
 }
 
 
-impl GoraudShader {
+impl GouraudShader {
     fn vertex(coordinates: &wavefront::Object, view_port: &Matrix4<f64>, projection: &Matrix4<f64>, model_view: &Matrix4<f64>, light_vector: &Vector3<f64>, face_index: usize, vertex_index: usize) -> Matrix4x1<f64> {
         varying_intensity[vertex_index] = 0.0.max(coordinates.normal_faces[face_index][vertex_index].normalize().cross(&light_vector));
         let gl_vertex: Matrix4x1<f64> = vector::matricize(coordinates.geometric_vertices[face_index][vertex_index]);
