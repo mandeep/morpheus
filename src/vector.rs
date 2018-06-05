@@ -14,7 +14,7 @@ use nalgebra::geometry::{Point2, Point3};
 /// assert!(point.x == 1.0 && point.y == 2.0);
 /// ```
 ///
-pub fn project2(vector: Vector3<f64>) -> Point2<f64> {
+pub fn project_to_2d(vector: Vector3<f64>) -> Point2<f64> {
     Point2::new(vector.x / vector.z, vector.y / vector.z)
 }
 
@@ -29,7 +29,7 @@ pub fn project2(vector: Vector3<f64>) -> Point2<f64> {
 /// assert!(point.x == 1.0 && point.y == 2.0 && point.z == 3.0);
 /// ```
 ///
-pub fn project3(matrix: Vector4<f64>) -> Point3<f64> {
+pub fn project_to_3d(matrix: Vector4<f64>) -> Point3<f64> {
     Point3::new(matrix.row(0)[0] / matrix.row(3)[0], matrix.row(1)[0] / matrix.row(3)[0], matrix.row(2)[0] / matrix.row(3)[0])
 }
 
@@ -44,7 +44,7 @@ pub fn project3(matrix: Vector4<f64>) -> Point3<f64> {
 /// assert!(vector.x == 1.0 && vector.y == 2.0 && vector.z == 1.0);
 /// ```
 ///
-pub fn vectorize3(point: Point2<f64>) -> Vector3<f64> {
+pub fn vectorize_to_3d(point: Point2<f64>) -> Vector3<f64> {
     Vector3::new(point.x, point.y, 1.0)
 }
 
@@ -59,6 +59,6 @@ pub fn vectorize3(point: Point2<f64>) -> Vector3<f64> {
 /// assert!(matrix.row(0)[0] == 1.0 && matrix.row(1)[0] == 2.0 && matrix.row(2)[0] == 3.0 && matrix.row(3)[0] == 1.0);
 /// ```
 ///
-pub fn vectorize4(point: Point3<f64>) -> Vector4<f64> {
+pub fn vectorize_to_4d(point: Point3<f64>) -> Vector4<f64> {
     Vector4::new(point.x, point.y, point.z, 1.0)
 }
