@@ -10,7 +10,7 @@ use nalgebra::geometry::{Point2, Point3};
 ///
 /// ```
 /// let matrix: Vector3<f64> = Vector3::new(2.0, 4.0, 2.0);
-/// let point: Point2<f64> = project2(matrix);
+/// let point: Point2<f64> = project_to_2d(matrix);
 /// assert!(point.x == 1.0 && point.y == 2.0);
 /// ```
 ///
@@ -25,7 +25,7 @@ pub fn project_to_2d(vector: Vector3<f64>) -> Point2<f64> {
 ///
 /// ```
 /// let matrix: Vector4<f64> = Vector4::new(2.0, 4.0, 6.0, 2.0);
-/// let point: Point3<f64> = project3(matrix);
+/// let point: Point3<f64> = project_to_3d(matrix);
 /// assert!(point.x == 1.0 && point.y == 2.0 && point.z == 3.0);
 /// ```
 ///
@@ -40,7 +40,7 @@ pub fn project_to_3d(vector: Vector4<f64>) -> Point3<f64> {
 ///
 /// ```
 /// let point: Point2<f64> = Point2::new(1.0, 2.0);
-/// let vector: Vector3<f64> = vectorize3(point);
+/// let vector: Vector3<f64> = vectorize_to_3d(point);
 /// assert!(vector.x == 1.0 && vector.y == 2.0 && vector.z == 1.0);
 /// ```
 ///
@@ -49,14 +49,14 @@ pub fn vectorize_to_3d(point: Point2<f64>) -> Vector3<f64> {
 }
 
 
-/// Create a 4x1 matrix from a 3D point by setting the last row to 1.0
+/// Create a 4D vector from a 3D point by setting the w coordinate to 1.0
 ///
 /// # Examples
 ///
 /// ```
 /// let point: Point3<f64> = Point3::new(1.0, 2.0, 3.0);
-/// let matrix: Vector4<f64> = vectorize4(point);
-/// assert!(matrix.row(0)[0] == 1.0 && matrix.row(1)[0] == 2.0 && matrix.row(2)[0] == 3.0 && matrix.row(3)[0] == 1.0);
+/// let vector: Vector4<f64> = vectorize_to_4d(point);
+/// assert!(vector.x == 1.0 && vector.y == 2.0 && vector.z == 3.0 && vector.w == 1.0);
 /// ```
 ///
 pub fn vectorize_to_4d(point: Point3<f64>) -> Vector4<f64> {
