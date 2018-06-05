@@ -29,8 +29,8 @@ pub fn project_to_2d(vector: Vector3<f64>) -> Point2<f64> {
 /// assert!(point.x == 1.0 && point.y == 2.0 && point.z == 3.0);
 /// ```
 ///
-pub fn project_to_3d(matrix: Vector4<f64>) -> Point3<f64> {
-    Point3::new(matrix.row(0)[0] / matrix.row(3)[0], matrix.row(1)[0] / matrix.row(3)[0], matrix.row(2)[0] / matrix.row(3)[0])
+pub fn project_to_3d(vector: Vector4<f64>) -> Point3<f64> {
+    Point3::new(vector.x / vector.w, vector.y / vector.w, vector.z / vector.w)
 }
 
 
