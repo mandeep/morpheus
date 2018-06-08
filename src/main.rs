@@ -7,6 +7,7 @@ use std::fs::File;
 use nalgebra::core::Vector3;
 
 mod render;
+mod shader;
 mod vector;
 mod wavefront;
 
