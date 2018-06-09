@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 
+use nalgebra::core::Vector3;
 use nalgebra::geometry::{Point2, Point3};
 
 
@@ -26,11 +27,11 @@ use nalgebra::geometry::{Point2, Point3};
 ///
 pub struct Object {
     pub geometric_vertices: Vec<Point3<f64>>,
-    pub geometric_faces: Vec<Vec<i32>>,
+    pub geometric_faces: Vec<Vector3<i32>>,
     pub texture_vertices: Vec<Point2<f64>>,
-    pub texture_faces: Vec<Vec<i32>>,
+    pub texture_faces: Vec<Vector3<i32>>,
     pub normal_vertices: Vec<Point3<f64>>,
-    pub normal_faces: Vec<Vec<i32>>
+    pub normal_faces: Vec<Vector3<i32>>
 }
 
 
@@ -60,11 +61,11 @@ impl Object {
     pub fn new(filename: &str) -> Object {
         let file = BufReader::new(File::open(filename).unwrap());
         let mut geometric_vertices: Vec<Point3<f64>> = Vec::new();
-        let mut geometric_faces: Vec<Vec<i32>> = Vec::new();
+        let mut geometric_faces: Vec<Vector3<i32>> = Vec::new();
         let mut texture_vertices: Vec<Point2<f64>> = Vec::new();
-        let mut texture_faces: Vec<Vec<i32>> = Vec::new();
+        let mut texture_faces: Vec<Vector3<i32>> = Vec::new();
         let mut normal_vertices: Vec<Point3<f64>> = Vec::new();
-        let mut normal_faces: Vec<Vec<i32>> = Vec::new();
+        let mut normal_faces: Vec<Vector3<i32>> = Vec::new();
 
         for line in file.lines().map(|l| l.unwrap()) {
             if line.starts_with("v ") {
@@ -97,9 +98,9 @@ impl Object {
                                         .map(|n| n.parse().unwrap())
                                         .collect::<Vec<i32>>();
 
-                geometric_faces.push(vec![f_coordinates[0], f_coordinates[3], f_coordinates[6]]);
-                texture_faces.push(vec![f_coordinates[1], f_coordinates[4], f_coordinates[7]]);
-                normal_faces.push(vec![f_coordinates[2], f_coordinates[5], f_coordinates[8]]);
+                geometric_faces.push(Vector3::new(f_coordinates[0], f_coordinates[3], f_coordinates[6]));
+                texture_faces.push(Vector3::new(f_coordinates[1], f_coordinates[4], f_coordinates[7]));
+                normal_faces.push(Vector3::new(f_coordinates[2], f_coordinates[5], f_coordinates[8]));
             }
         }
         Object { geometric_vertices: geometric_vertices, geometric_faces: geometric_faces,
