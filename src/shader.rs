@@ -3,32 +3,33 @@ extern crate image;
 
 use nalgebra::core::{Matrix4, Vector3, Vector4};
 
-mod vector;
-mod wavefront;
+use vector;
+use wavefront;
 
 
-struct GouraudShader {
+pub struct GouraudShader {
     varying_intensity: Vector3<f64>,
 }
 
 
 impl GouraudShader {
-    fn new() -> GouraudShader {
-        GouraudShader { varying_intensity: Vector3<f64>::new() }
-    }
+    pub fn vertex(&self, coordinates: &wavefront::Object, view_port: &Matrix4<f64>, projection: &Matrix4<f64>, model_view: &Matrix4<f64>,
+              light_vector: &Vector3<f64>, vertex_index: usize) -> Vector4<f64> {
 
-    fn vertex(coordinates: &wavefront::Object, view_port: &Matrix4<f64>, projection: &Matrix4<f64>, model_view: &Matrix4<f64>,
-              light_vector: &Vector3<f64>, face_index: usize, vertex_index: usize) -> Vector4<f64> {
-
-        varying_intensity[vertex_index] = 0.0.max(coordinates.normal_faces[face_index][vertex_index].normalize().cross(&light_vector));
-        let gl_vertex: Vector4<f64> = vector::vectorize_to_4d(coordinates.geometric_vertices[face_index][vertex_index]);
+        self.varying_intensity[vertex_index] = 0.0f64.max(coordinates.normal_faces[vertex_index].map(|n| n as f64)
+                                                                                                .normalize()
+                                                                                                .dot(&light_vector));
+        let gl_vertex: Vector4<f64> = vector::vectorize_to_4d(coordinates.geometric_vertices[vertex_index]);
 
         view_port * projection * model_view * gl_vertex
     }
 
-    fn fragment(pixel: Vector3<f64>, color: &mut image::Rgb<u8>) -> bool {
-        let intensity: f64 = varying_intensity.cross(&pixel);
-        color = image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]);
+    pub fn fragment(&self, pixel: Vector3<f64>, color: &mut image::Rgb<u8>) -> bool {
+        let intensity: f64 = self.varying_intensity.dot(&pixel);
+
+        for i in 0..=2 {
+            color[i] = (255.0 * intensity) as u8;
+        }
 
         false
     }
