@@ -1,7 +1,6 @@
 extern crate nalgebra;
 
-use nalgebra::core::{Vector3, Vector4};
-use nalgebra::geometry::{Point2, Point3};
+use nalgebra::core::{Vector2, Vector3, Vector4};
 
 
 /// Project 3D coordinates into 2D by dividing the x and y coordinate by the z coordinate
@@ -14,8 +13,8 @@ use nalgebra::geometry::{Point2, Point3};
 /// assert!(point.x == 1.0 && point.y == 2.0);
 /// ```
 ///
-pub fn project_to_2d(vector: Vector3<f64>) -> Point2<f64> {
-    Point2::new(vector.x / vector.z, vector.y / vector.z)
+pub fn project_to_2d(vector: Vector3<f64>) -> Vector2<f64> {
+    Vector2::new(vector.x / vector.z, vector.y / vector.z)
 }
 
 
@@ -29,8 +28,8 @@ pub fn project_to_2d(vector: Vector3<f64>) -> Point2<f64> {
 /// assert!(point.x == 1.0 && point.y == 2.0 && point.z == 3.0);
 /// ```
 ///
-pub fn project_to_3d(vector: Vector4<f64>) -> Point3<f64> {
-    Point3::new(vector.x / vector.w, vector.y / vector.w, vector.z / vector.w)
+pub fn project_to_3d(vector: Vector4<f64>) -> Vector3<f64> {
+    Vector3::new(vector.x / vector.w, vector.y / vector.w, vector.z / vector.w)
 }
 
 
@@ -44,7 +43,7 @@ pub fn project_to_3d(vector: Vector4<f64>) -> Point3<f64> {
 /// assert!(vector.x == 1.0 && vector.y == 2.0 && vector.z == 1.0);
 /// ```
 ///
-pub fn vectorize_to_3d(point: Point2<f64>) -> Vector3<f64> {
+pub fn vectorize_to_3d(point: Vector2<f64>) -> Vector3<f64> {
     Vector3::new(point.x, point.y, 1.0)
 }
 
@@ -59,6 +58,6 @@ pub fn vectorize_to_3d(point: Point2<f64>) -> Vector3<f64> {
 /// assert!(vector.x == 1.0 && vector.y == 2.0 && vector.z == 3.0 && vector.w == 1.0);
 /// ```
 ///
-pub fn vectorize_to_4d(point: Point3<f64>) -> Vector4<f64> {
+pub fn vectorize_to_4d(point: Vector3<f64>) -> Vector4<f64> {
     Vector4::new(point.x, point.y, point.z, 1.0)
 }

@@ -4,8 +4,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 
-use nalgebra::core::Vector3;
-use nalgebra::geometry::{Point2, Point3};
+use nalgebra::core::{Vector2, Vector3};
 
 
 /// A wavefront object containing vertices and faces from a wavefront file.
@@ -26,11 +25,11 @@ use nalgebra::geometry::{Point2, Point3};
 /// ```
 ///
 pub struct Object {
-    pub geometric_vertices: Vec<Point3<f64>>,
+    pub geometric_vertices: Vec<Vector3<f64>>,
     pub geometric_faces: Vec<Vector3<i32>>,
-    pub texture_vertices: Vec<Point2<f64>>,
+    pub texture_vertices: Vec<Vector2<f64>>,
     pub texture_faces: Vec<Vector3<i32>>,
-    pub normal_vertices: Vec<Point3<f64>>,
+    pub normal_vertices: Vec<Vector3<f64>>,
     pub normal_faces: Vec<Vector3<i32>>
 }
 
@@ -60,11 +59,11 @@ impl Object {
     ///
     pub fn new(filename: &str) -> Object {
         let file = BufReader::new(File::open(filename).unwrap());
-        let mut geometric_vertices: Vec<Point3<f64>> = Vec::new();
+        let mut geometric_vertices: Vec<Vector3<f64>> = Vec::new();
         let mut geometric_faces: Vec<Vector3<i32>> = Vec::new();
-        let mut texture_vertices: Vec<Point2<f64>> = Vec::new();
+        let mut texture_vertices: Vec<Vector2<f64>> = Vec::new();
         let mut texture_faces: Vec<Vector3<i32>> = Vec::new();
-        let mut normal_vertices: Vec<Point3<f64>> = Vec::new();
+        let mut normal_vertices: Vec<Vector3<f64>> = Vec::new();
         let mut normal_faces: Vec<Vector3<i32>> = Vec::new();
 
         for line in file.lines().map(|l| l.unwrap()) {
@@ -74,7 +73,7 @@ impl Object {
                                         .map(|n| n.parse().unwrap())
                                         .collect::<Vec<f64>>();
 
-                geometric_vertices.push(Point3::new(v_coordinates[0], v_coordinates[1], v_coordinates[2]));
+                geometric_vertices.push(Vector3::new(v_coordinates[0], v_coordinates[1], v_coordinates[2]));
             }
             else if line.starts_with("vt ") {
                 let vt_coordinates = line.split_at(3).1
@@ -82,7 +81,7 @@ impl Object {
                                          .map(|n| n.parse().unwrap())
                                          .collect::<Vec<f64>>();
 
-                texture_vertices.push(Point2::new(vt_coordinates[0], vt_coordinates[1]));
+                texture_vertices.push(Vector2::new(vt_coordinates[0], vt_coordinates[1]));
             }
             else if line.starts_with("vn ") {
                 let vn_coordinates = line.split_at(3).1
@@ -90,7 +89,7 @@ impl Object {
                                          .map(|n| n.parse().unwrap())
                                          .collect::<Vec<f64>>();
 
-                normal_vertices.push(Point3::new(vn_coordinates[0], vn_coordinates[1], vn_coordinates[2]));
+                normal_vertices.push(Vector3::new(vn_coordinates[0], vn_coordinates[1], vn_coordinates[2]));
             }
             else if line.starts_with("f ") {
                 let f_coordinates = line.split_at(2).1
