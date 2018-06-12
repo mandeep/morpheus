@@ -4,9 +4,10 @@ extern crate nalgebra;
 
 use std::mem::swap;
 
-use nalgebra::core::{Matrix4, Vector3};
-use nalgebra::geometry::{Point2, Point3};
+use nalgebra::core::{Matrix4, Vector2, Vector3, Vector4};
+use nalgebra::geometry::{Point2};
 
+use shader;
 use wavefront;
 use vector;
 
@@ -168,16 +169,21 @@ fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<f64>
 /// let barycentric_coordinates: Point3<f64> = find_barycentric(&points, &point);
 /// ```
 ///
-fn find_barycentric(points: &Vec<Point3<f64>>, point: &Point3<f64>) -> Point3<f64> {
-    let u = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
-    let v = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
+fn find_barycentric(a: Vector2<f64>, b: Vector2<f64>, c: Vector2<f64>, p: &Vector2<f64>) -> Vector3<f64> {
+    let mut s = vec![Vector3::zeros(), Vector3::zeros(), Vector3::zeros()];
 
-    let w = u.cross(&v);
+    for i in 2..=0 {
+        s[i][0] = c[i] - a[i];
+        s[i][1] = b[i] - a[i];
+        s[i][2] = a[i] - p[i];
+    }
 
-    if (w.z).abs() < 1.0 {
-        return Point3::new(-1.0, 1.0, 1.0);
+    let u: Vector3<f64> = s[0].cross(&s[1]);
+
+    if (u.z).abs() < 0.01 {
+        return Vector3::new(-1.0, 1.0, 1.0);
     } else {
-        return Point3::new(1.0 - (w.x + w.y) as f64 / w.z as f64, w.y as f64 / w.z as f64, w.x as f64 / w.z as f64);
+        return Vector3::new(1.0 - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
     }
 
 }
@@ -194,9 +200,9 @@ fn find_barycentric(points: &Vec<Point3<f64>>, point: &Point3<f64>) -> Point3<f6
 /// draw_triangle(&points, &mut buffer, &mut zbuffer, image::Rgb([255, 255, 255]))
 /// ```
 ///
-fn draw_triangle(points: &Vec<Point3<f64>>, buffer: &mut image::RgbImage, zbuffer: &mut Vec<f64>, color: image::Rgb<u8>) {
-    let mut bounding_box_minimum: Point2<f64> = Point2::new(buffer.width() as f64 - 1.0, buffer.height() as f64 - 1.0);
-    let mut bounding_box_maximum: Point2<f64> = Point2::new(0.0, 0.0);
+fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage, zbuffer: &mut image::GrayImage, shader: shader::GouraudShader) {
+    let mut bounding_box_minimum: Vector2<f64> = Vector2::new(buffer.width() as f64 - 1.0, buffer.height() as f64 - 1.0);
+    let mut bounding_box_maximum: Vector2<f64> = Vector2::new(0.0, 0.0);
 
     for point in points {
         bounding_box_minimum.x = bounding_box_minimum.x.min(point.x);
@@ -207,15 +213,24 @@ fn draw_triangle(points: &Vec<Point3<f64>>, buffer: &mut image::RgbImage, zbuffe
 
     for x in bounding_box_minimum.x as i32 ..= bounding_box_maximum.x as i32 {
         for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
-            let mut point = Point3::new(x as f64, y as f64, 0.0);
-            let barycentric_coordinates: Point3<f64> = find_barycentric(points, &point);
-            if barycentric_coordinates.x >= 0.0 && barycentric_coordinates.y >= 0.0 && barycentric_coordinates.z >= 0.0 {
-                for i in 0..3 {
-                    point.z += points[i].z * barycentric_coordinates[i];
-                }
-                if zbuffer[(point.x as u32 + (point.y as u32 * buffer.width())) as usize] < point.z {
-                    zbuffer[(point.x as u32 + (point.y as u32 * buffer.width())) as usize] = point.z;
-                    buffer.put_pixel(point.x as u32, point.y as u32, color)
+            let mut point = Vector2::new(x as f64, y as f64);
+            let mut color = image::Rgb([255, 255, 255]);
+            let c: Vector3<f64> = find_barycentric(vector::project_to_2d(vector::project_to_3d(points[0])),
+                                                   vector::project_to_2d(vector::project_to_3d(points[1])),
+                                                   vector::project_to_2d(vector::project_to_3d(points[2])),
+                                                   &point);
+
+            let z = points[0][2] * c.x + points[1][2] * c.y + points[2][2] * c.z;
+            let w = points[0][3] * c.x + points[1][3] * c.y + points[2][3] * c.z;
+
+            let fragment_depth = 0.max(255.min((z / w + 0.5) as u8));
+
+
+            if c.x >= 0.0 && c.y >= 0.0 && c.z >= 0.0 && zbuffer.get_pixel(point.x as u32, point.y as u32)[0] > fragment_depth {
+                let discard = shader.fragment(c, &mut color);
+                if !discard {
+                    zbuffer.put_pixel(point.x as u32, point.y as u32, image::Luma([fragment_depth]));
+                    buffer.put_pixel(point.x as u32, point.y as u32, color);
                 }
             }
         }
@@ -264,31 +279,20 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
 ///
 /// draw_triangle_mesh("coordinates.obj", &mut buffer, light_vector);
 /// ```
-pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, depth: u32, light_vector: &Vector3<f64>, eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) {
+pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, zbuffer: &mut image::GrayImage, depth: u32, light_vector: &Vector3<f64>, eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) {
     let coordinates = wavefront::Object::new(filename);
-
-    let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height()) as usize];
 
     let model_view = lookat(eye, center, up);
     let projection = projection(-1.0 / (eye - center).norm());
     let view_port = viewport(buffer.width() / 8, buffer.height() / 8, buffer.width() * 3 / 4, buffer.height() * 3 / 4, depth);
 
-    for face in coordinates.geometric_faces {
-        let mut screen_coordinates: Vec<Point3<f64>> = Vec::new();
-        let mut world_coordinates: Vec<Point3<f64>> = Vec::new();
-
-        for i in 0..3 {
-            let world_coordinate: Point3<f64> = coordinates.geometric_vertices[(face[i] - 1) as usize];
-            let screen_coordinate: Point3<f64> = vector::project_to_3d(view_port * projection * model_view * vector::vectorize_to_4d(world_coordinate));
-
-            screen_coordinates.push(screen_coordinate);
-            world_coordinates.push(world_coordinate);
+    for _ in 0..coordinates.geometric_faces.len() {
+        let mut shader = shader::GouraudShader{ varying_intensity: Vector3::zeros() };
+        let mut screen_coordinates: Vec<Vector4<f64>> = Vec::new();
+        for i in 0..=2 {
+            screen_coordinates.push(shader.vertex(&coordinates, &view_port, &projection, &model_view, &light_vector, i))
         }
-
-        let normal: Vector3<f64> = (world_coordinates[2] - world_coordinates[0]).cross(&(world_coordinates[1] - world_coordinates[0])).normalize();
-        let intensity: f64 = normal.dot(&light_vector);
-
-        draw_triangle(&screen_coordinates, buffer, &mut zbuffer, image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8]));
+        draw_triangle(&screen_coordinates, buffer, zbuffer, shader);
     }
 }
 
