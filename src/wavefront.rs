@@ -97,9 +97,9 @@ impl Object {
                                         .map(|n| n.parse().unwrap())
                                         .collect::<Vec<i32>>();
 
-                geometric_faces.push(Vector3::new(f_coordinates[0], f_coordinates[3], f_coordinates[6]));
-                texture_faces.push(Vector3::new(f_coordinates[1], f_coordinates[4], f_coordinates[7]));
-                normal_faces.push(Vector3::new(f_coordinates[2], f_coordinates[5], f_coordinates[8]));
+                geometric_faces.push(Vector3::new(f_coordinates[0] - 1, f_coordinates[3] - 1, f_coordinates[6] - 1));
+                texture_faces.push(Vector3::new(f_coordinates[1] - 1, f_coordinates[4] - 1, f_coordinates[7] - 1));
+                normal_faces.push(Vector3::new(f_coordinates[2] - 1, f_coordinates[5] - 1, f_coordinates[8] - 1));
             }
         }
         Object { geometric_vertices: geometric_vertices, geometric_faces: geometric_faces,
