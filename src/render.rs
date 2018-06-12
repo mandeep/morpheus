@@ -286,12 +286,14 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage, zbuffer:
     let projection = projection(-1.0 / (eye - center).norm());
     let view_port = viewport(buffer.width() / 8, buffer.height() / 8, buffer.width() * 3 / 4, buffer.height() * 3 / 4, depth);
 
-    for _ in 0..coordinates.geometric_faces.len() {
+    for face_index in 0..coordinates.normal_faces.len() {
         let mut shader = shader::GouraudShader{ varying_intensity: Vector3::zeros() };
         let mut screen_coordinates: Vec<Vector4<f64>> = Vec::new();
-        for i in 0..=2 {
-            screen_coordinates.push(shader.vertex(&coordinates, &view_port, &projection, &model_view, &light_vector, i))
+
+        for vertex_index in 0..=2 {
+            screen_coordinates.push(shader.vertex(&coordinates, &view_port, &projection, &model_view, &light_vector, vertex_index, face_index));
         }
+
         draw_triangle(&screen_coordinates, buffer, zbuffer, shader);
     }
 }
