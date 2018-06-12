@@ -8,13 +8,13 @@ use wavefront;
 
 
 pub struct GouraudShader {
-    varying_intensity: Vector3<f64>,
+    pub varying_intensity: Vector3<f64>,
 }
 
 
 impl GouraudShader {
-    pub fn vertex(&self, coordinates: &wavefront::Object, view_port: &Matrix4<f64>, projection: &Matrix4<f64>, model_view: &Matrix4<f64>,
-              light_vector: &Vector3<f64>, vertex_index: usize) -> Vector4<f64> {
+    pub fn vertex(&mut self, coordinates: &wavefront::Object, view_port: &Matrix4<f64>, projection: &Matrix4<f64>, model_view: &Matrix4<f64>,
+                  light_vector: &Vector3<f64>, vertex_index: usize) -> Vector4<f64> {
 
         self.varying_intensity[vertex_index] = 0.0f64.max(coordinates.normal_faces[vertex_index].map(|n| n as f64)
                                                                                                 .normalize()
