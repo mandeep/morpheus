@@ -25,7 +25,8 @@ fn main() {
     let up = Vector3::new(0.0, 1.0, 0.0);
     let light_vector = Vector3::new(5.0, 5.0, 20.0).normalize();
 
-    render::draw_triangle_mesh(&args[1], &mut buffer, &mut zbuffer, depth, &light_vector, &eye, &center, &up);
+    render::draw_triangle_mesh(&args[1], &mut buffer, &mut zbuffer, depth,
+                               &light_vector, &eye, &center, &up);
 
     let ref mut render = File::create(&args[2]).unwrap();
     let ref mut zbuffer_render = File::create(&args[3]).unwrap();
