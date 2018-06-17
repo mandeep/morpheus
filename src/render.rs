@@ -424,4 +424,30 @@ mod tests {
         assert_eq!(view.row(3)[2], 0.0);
         assert_eq!(view.row(3)[3], 1.0);
     }
+
+    #[test]
+    fn test_viewport() {
+        let (width, height, depth) = (800, 800, 255);
+        let view = viewport(width / 8, height / 8, width * 3/4, height * 3/4, depth);
+
+        assert_eq!(view.row(0)[0], 300.0);
+        assert_eq!(view.row(0)[1], 0.0);
+        assert_eq!(view.row(0)[2], 0.0);
+        assert_eq!(view.row(0)[3], 400.0);
+
+        assert_eq!(view.row(1)[0], 0.0);
+        assert_eq!(view.row(1)[1], 300.0);
+        assert_eq!(view.row(1)[2], 0.0);
+        assert_eq!(view.row(1)[3], 400.0);
+
+        assert_eq!(view.row(2)[0], 0.0);
+        assert_eq!(view.row(2)[1], 0.0);
+        assert!(view.row(2)[2] - 127.5 < 0.0001);
+        assert!(view.row(2)[3] - 127.5 < 0.0001);
+
+        assert_eq!(view.row(3)[0], 0.0);
+        assert_eq!(view.row(3)[1], 0.0);
+        assert_eq!(view.row(3)[2], 0.0);
+        assert_eq!(view.row(3)[3], 1.0);
+    }
 }
