@@ -180,7 +180,7 @@ fn find_barycentric(a: Vector2<f64>, b: Vector2<f64>,
 
     let mut s = vec![Vector3::zeros(), Vector3::zeros(), Vector3::zeros()];
 
-    for i in 2..=0 {
+    for i in (0..2).rev() {
         s[i][0] = c[i] - a[i];
         s[i][1] = b[i] - a[i];
         s[i][2] = a[i] - p[i];
@@ -228,10 +228,10 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
             let mut color = image::Rgb([255, 255, 255]);
 
             let c: Vector3<f64> = find_barycentric(
-                vector::project_to_2d(vector::project_to_3d(points[0])),
-                vector::project_to_2d(vector::project_to_3d(points[1])),
-                vector::project_to_2d(vector::project_to_3d(points[2])),
-                                      &point);
+                vector::project_to_3d(points[0]).remove_row(2),
+                vector::project_to_3d(points[1]).remove_row(2),
+                vector::project_to_3d(points[2]).remove_row(2),
+                &point);
 
             let z = points[0][2] * c.x + points[1][2] * c.y + points[2][2] * c.z;
             let w = points[0][3] * c.x + points[1][3] * c.y + points[2][3] * c.z;
