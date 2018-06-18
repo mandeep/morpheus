@@ -426,6 +426,34 @@ mod tests {
     }
 
     #[test]
+    fn test_projection() {
+        let eye: Vector3<f64> = Vector3::new(0.0, -1.0, 3.0);
+        let center: Vector3<f64> = Vector3::zeros();
+
+        let view = projection(-1.0 / (&eye - &center).norm());
+
+        assert_eq!(view.row(0)[0], 1.0);
+        assert_eq!(view.row(0)[1], 0.0);
+        assert_eq!(view.row(0)[2], 0.0);
+        assert_eq!(view.row(0)[3], 0.0);
+
+        assert_eq!(view.row(1)[0], 0.0);
+        assert_eq!(view.row(1)[1], 1.0);
+        assert_eq!(view.row(1)[2], 0.0);
+        assert_eq!(view.row(1)[3], 0.0);
+
+        assert_eq!(view.row(2)[0], 0.0);
+        assert_eq!(view.row(2)[1], 0.0);
+        assert_eq!(view.row(2)[2], 1.0);
+        assert_eq!(view.row(2)[3], 0.0);
+
+        assert_eq!(view.row(3)[0], 0.0);
+        assert_eq!(view.row(3)[1], 0.0);
+        assert!(view.row(3)[2].is_negative() && view.row(3)[2].abs() - 0.316228 < 0.0001);
+        assert_eq!(view.row(3)[3], 1.0);
+    }
+
+    #[test]
     fn test_viewport() {
         let (width, height, depth) = (800, 800, 255);
         let view = viewport(width / 8, height / 8, width * 3/4, height * 3/4, depth);
