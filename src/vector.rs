@@ -9,7 +9,7 @@ use nalgebra::core::{Vector2, Vector3, Vector4};
 ///
 /// ```
 /// let matrix: Vector3<f64> = Vector3::new(2.0, 4.0, 2.0);
-/// let point: Point2<f64> = project_to_2d(matrix);
+/// let point: Vector2<f64> = project_to_2d(matrix);
 /// assert!(point.x == 1.0 && point.y == 2.0);
 /// ```
 ///
@@ -24,7 +24,7 @@ pub fn project_to_2d(vector: Vector3<f64>) -> Vector2<f64> {
 ///
 /// ```
 /// let matrix: Vector4<f64> = Vector4::new(2.0, 4.0, 6.0, 2.0);
-/// let point: Point3<f64> = project_to_3d(matrix);
+/// let point: Vector3<f64> = project_to_3d(matrix);
 /// assert!(point.x == 1.0 && point.y == 2.0 && point.z == 3.0);
 /// ```
 ///
@@ -38,7 +38,7 @@ pub fn project_to_3d(vector: Vector4<f64>) -> Vector3<f64> {
 /// # Examples
 ///
 /// ```
-/// let point: Point2<f64> = Point2::new(1.0, 2.0);
+/// let point: Vector2<f64> = Vector2::new(1.0, 2.0);
 /// let vector: Vector3<f64> = vectorize_to_3d(point);
 /// assert!(vector.x == 1.0 && vector.y == 2.0 && vector.z == 1.0);
 /// ```
@@ -53,11 +53,44 @@ pub fn vectorize_to_3d(point: Vector2<f64>) -> Vector3<f64> {
 /// # Examples
 ///
 /// ```
-/// let point: Point3<f64> = Point3::new(1.0, 2.0, 3.0);
+/// let point: Vector3<f64> = Vector3::new(1.0, 2.0, 3.0);
 /// let vector: Vector4<f64> = vectorize_to_4d(point);
 /// assert!(vector.x == 1.0 && vector.y == 2.0 && vector.z == 3.0 && vector.w == 1.0);
 /// ```
 ///
 pub fn vectorize_to_4d(point: Vector3<f64>) -> Vector4<f64> {
     Vector4::new(point.x, point.y, point.z, 1.0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_project_2d() {
+        let matrix: Vector3<f64> = Vector3::new(2.0, 4.0, 2.0);
+        let point: Vector2<f64> = project_to_2d(matrix);
+        assert!(point.x == 1.0 && point.y == 2.0);
+    }
+
+    #[test]
+    fn test_project_3d() {
+        let matrix: Vector4<f64> = Vector4::new(2.0, 4.0, 6.0, 2.0);
+        let point: Vector3<f64> = project_to_3d(matrix);
+        assert!(point.x == 1.0 && point.y == 2.0 && point.z == 3.0);
+    }
+
+    #[test]
+    fn test_vectorize_3d() {
+        let point: Vector2<f64> = Vector2::new(1.0, 2.0);
+        let vector: Vector3<f64> = vectorize_to_3d(point);
+        assert!(vector.x == 1.0 && vector.y == 2.0 && vector.z == 1.0);
+    }
+
+    #[test]
+    fn test_vectorize_4d() {
+        let point: Vector3<f64> = Vector3::new(1.0, 2.0, 3.0);
+        let vector: Vector4<f64> = vectorize_to_4d(point);
+        assert!(vector.x == 1.0 && vector.y == 2.0 && vector.z == 3.0 && vector.w == 1.0);
+    }
 }
