@@ -449,7 +449,7 @@ mod tests {
 
         assert_eq!(view.row(3)[0], 0.0);
         assert_eq!(view.row(3)[1], 0.0);
-        assert!(view.row(3)[2].is_negative() && view.row(3)[2].abs() - 0.316228 < 0.0001);
+        assert!(view.row(3)[2].is_sign_negative() && view.row(3)[2].abs() - 0.316228 < 0.0001);
         assert_eq!(view.row(3)[3], 1.0);
     }
 
