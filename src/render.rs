@@ -215,13 +215,12 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
                                                               buffer.height() as f64 - 1.0);
     let mut bounding_box_maximum: Vector2<f64> = Vector2::new(0.0, 0.0);
 
-    for point in points {
-        bounding_box_minimum.x = bounding_box_minimum.x.min(point.x);
-        bounding_box_minimum.y = bounding_box_minimum.y.min(point.y);
-        bounding_box_maximum.x = bounding_box_maximum.x.max(point.x);
-        bounding_box_maximum.y = bounding_box_maximum.y.max(point.y);
+    for i in 0..=2 {
+        for j in 0..=1 {
+            bounding_box_minimum[j] = bounding_box_minimum[j].min(points[i][j] / points[i][3]);
+            bounding_box_maximum[j] = bounding_box_maximum[j].max(points[i][j] / points[i][3]);
+        }
     }
-
     for x in bounding_box_minimum.x as i32 ..= bounding_box_maximum.x as i32 {
         for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
             let mut point = Vector2::new(x as f64, y as f64);
