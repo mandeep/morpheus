@@ -3,7 +3,7 @@ extern crate nalgebra;
 
 use std::mem::swap;
 
-use nalgebra::core::{Matrix4, Vector2, Vector3, Vector4};
+use nalgebra::core::{Vector2, Vector3, Vector4};
 use nalgebra::geometry::{Point2};
 
 use shader;
@@ -112,89 +112,6 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>,
     }
 }
 
-/// Change the frame of reference of the viewer
-///
-/// The eye vector is where the camera is situated. The center
-/// vector is where the camera should point in relation to
-/// the up vector which is vertical when rendered.
-///
-fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> Matrix4<f64> {
-    let z = (eye - center).normalize();
-    let x = up.cross(&z).normalize();
-    let y = z.cross(&x).normalize();
-
-    let mut matrix: Matrix4<f64> = Matrix4::identity();
-    let mut transpose: Matrix4<f64> = Matrix4::identity();
-
-    for i in 0..3 {
-        matrix.row_mut(0)[i] = x[i];
-        matrix.row_mut(1)[i] = y[i];
-        matrix.row_mut(2)[i] = z[i];
-        transpose.row_mut(i)[3] = -center[i];
-    }
-
-    matrix * transpose
-}
-
-/// Create a projection matrix
-fn projection(coefficient: f64) -> Matrix4<f64> {
-    let mut matrix: Matrix4<f64> = Matrix4::identity();
-    matrix.row_mut(3)[2] = coefficient;
-
-    matrix
-
-}
-
-/// Map the bi-unit cube of [-1, 1] * [-1, 1] * [-1, 1] to the dimensions of the image
-///
-/// The x and y parameters specify the origin of the viewport while the
-/// width and height parameters specify the width and height of the viewport.
-///
-fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<f64> {
-    let mut matrix = Matrix4::identity();
-
-    matrix.row_mut(0)[3] = x as f64 + width as f64 / 2.0;
-    matrix.row_mut(1)[3] = y as f64 + height as f64 / 2.0;
-    matrix.row_mut(2)[3] = depth as f64 / 2.0;
-
-    matrix.row_mut(0)[0] = width as f64 / 2.0;
-    matrix.row_mut(1)[1] = height as f64 / 2.0;
-    matrix.row_mut(2)[2] = depth as f64 / 2.0;
-
-    matrix
-}
-
-/// Find the barycentric coordinates of the given point with respect to the given triangle
-///
-/// # Examples
-///
-/// ```
-/// let points =  vec![Vector3::new(0, 0, 0), Vector3::new(2, 2, 2), Vector3::new(0, 2, 2)]
-/// let point = Point3::new(1.0, 1.0, 0.0);
-/// let barycentric_coordinates: Point3<f64> = find_barycentric(&points, &point);
-/// ```
-///
-fn find_barycentric(a: Vector2<f64>, b: Vector2<f64>,
-                    c: Vector2<f64>, p: &Vector2<f64>) -> Vector3<f64> {
-
-    let mut s = vec![Vector3::zeros(), Vector3::zeros(), Vector3::zeros()];
-
-    for i in (0..2).rev() {
-        s[i][0] = c[i] - a[i];
-        s[i][1] = b[i] - a[i];
-        s[i][2] = a[i] - p[i];
-    }
-
-    let u: Vector3<f64> = s[0].cross(&s[1]);
-
-    if (u.z).abs() < 0.01 {
-        return Vector3::new(-1.0, 1.0, 1.0);
-    } else {
-        return Vector3::new(1.0 - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
-    }
-
-}
-
 /// Draw a filled triangle with the given points in the given color
 ///
 /// # Examples
@@ -225,10 +142,11 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
             let mut point = Vector2::new(x as f64, y as f64);
             let mut color = image::Rgb([255, 255, 255]);
 
-            let c: Vector3<f64> = find_barycentric(vector::project_to_3d(points[0]).remove_row(2),
-                                                   vector::project_to_3d(points[1]).remove_row(2),
-                                                   vector::project_to_3d(points[2]).remove_row(2),
-                                                   &point);
+            let c: Vector3<f64> = shader::find_barycentric(
+                                        vector::project_to_3d(points[0]).remove_row(2),
+                                        vector::project_to_3d(points[1]).remove_row(2),
+                                        vector::project_to_3d(points[2]).remove_row(2),
+                                        &point);
 
             let z = points[0][2] * c.x + points[1][2] * c.y + points[2][2] * c.z;
             let w = points[0][3] * c.x + points[1][3] * c.y + points[2][3] * c.z;
@@ -299,11 +217,11 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
 
     let coordinates = wavefront::Object::new(filename);
 
-    let model_view = lookat(eye, center, up);
-    let projection = projection(-1.0 / (eye - center).norm());
-    let view_port = viewport(buffer.width() / 8, buffer.height() / 8,
-                             buffer.width() * 3 / 4, buffer.height() * 3 / 4,
-                             depth);
+    let model_view = shader::lookat(eye, center, up);
+    let projection = shader::projection(-1.0 / (eye - center).norm());
+    let view_port = shader::viewport(buffer.width() / 8, buffer.height() / 8,
+                                     buffer.width() * 3 / 4, buffer.height() * 3 / 4,
+                                     depth);
 
     for face_index in 0..coordinates.geometric_faces.len() {
         let mut shader = shader::GouraudShader{ varying_intensity: Vector3::zeros() };
@@ -391,88 +309,5 @@ mod tests {
                 assert_eq!(test_file.get_pixel(x, y), output_file.get_pixel(x, y));
             }
         }
-    }
-
-    #[test]
-    fn test_lookat() {
-        let eye: Vector3<f64> = Vector3::new(0.0, -1.0, 3.0);
-        let center: Vector3<f64> = Vector3::zeros();
-        let up: Vector3<f64> = Vector3::new(0.0, 1.0, 0.0);
-
-        let view = lookat(&eye, &center, &up);
-
-        assert_eq!(view.row(0)[0], 1.0);
-        assert_eq!(view.row(0)[1], 0.0);
-        assert_eq!(view.row(0)[2], 0.0);
-        assert_eq!(view.row(0)[3], 0.0);
-
-        assert_eq!(view.row(1)[0], 0.0);
-        assert!(view.row(1)[1] - 0.948683 < 0.0001);
-        assert!(view.row(1)[2] - 0.316228 < 0.0001);
-        assert_eq!(view.row(1)[3], 0.0);
-
-        assert_eq!(view.row(2)[0], 0.0);
-        assert!(view.row(2)[1] - 0.316228 < 0.0001);
-        assert!(view.row(2)[2] - 0.948683 < 0.0001);
-        assert_eq!(view.row(2)[3], 0.0);
-
-        assert_eq!(view.row(3)[0], 0.0);
-        assert_eq!(view.row(3)[1], 0.0);
-        assert_eq!(view.row(3)[2], 0.0);
-        assert_eq!(view.row(3)[3], 1.0);
-    }
-
-    #[test]
-    fn test_projection() {
-        let eye: Vector3<f64> = Vector3::new(0.0, -1.0, 3.0);
-        let center: Vector3<f64> = Vector3::zeros();
-
-        let view = projection(-1.0 / (&eye - &center).norm());
-
-        assert_eq!(view.row(0)[0], 1.0);
-        assert_eq!(view.row(0)[1], 0.0);
-        assert_eq!(view.row(0)[2], 0.0);
-        assert_eq!(view.row(0)[3], 0.0);
-
-        assert_eq!(view.row(1)[0], 0.0);
-        assert_eq!(view.row(1)[1], 1.0);
-        assert_eq!(view.row(1)[2], 0.0);
-        assert_eq!(view.row(1)[3], 0.0);
-
-        assert_eq!(view.row(2)[0], 0.0);
-        assert_eq!(view.row(2)[1], 0.0);
-        assert_eq!(view.row(2)[2], 1.0);
-        assert_eq!(view.row(2)[3], 0.0);
-
-        assert_eq!(view.row(3)[0], 0.0);
-        assert_eq!(view.row(3)[1], 0.0);
-        assert!(view.row(3)[2].is_sign_negative() && view.row(3)[2].abs() - 0.316228 < 0.0001);
-        assert_eq!(view.row(3)[3], 1.0);
-    }
-
-    #[test]
-    fn test_viewport() {
-        let (width, height, depth) = (800, 800, 255);
-        let view = viewport(width / 8, height / 8, width * 3/4, height * 3/4, depth);
-
-        assert_eq!(view.row(0)[0], 300.0);
-        assert_eq!(view.row(0)[1], 0.0);
-        assert_eq!(view.row(0)[2], 0.0);
-        assert_eq!(view.row(0)[3], 400.0);
-
-        assert_eq!(view.row(1)[0], 0.0);
-        assert_eq!(view.row(1)[1], 300.0);
-        assert_eq!(view.row(1)[2], 0.0);
-        assert_eq!(view.row(1)[3], 400.0);
-
-        assert_eq!(view.row(2)[0], 0.0);
-        assert_eq!(view.row(2)[1], 0.0);
-        assert!(view.row(2)[2] - 127.5 < 0.0001);
-        assert!(view.row(2)[3] - 127.5 < 0.0001);
-
-        assert_eq!(view.row(3)[0], 0.0);
-        assert_eq!(view.row(3)[1], 0.0);
-        assert_eq!(view.row(3)[2], 0.0);
-        assert_eq!(view.row(3)[3], 1.0);
     }
 }
