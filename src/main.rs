@@ -30,7 +30,7 @@ fn main() {
                                &light_vector, &eye, &center, &up);
 
     let ref mut render = File::create(&args[2]).unwrap();
-    let ref mut zbuffer_render = File::create(&args[3]).unwrap();
+    let ref mut zbuffer_render = File::create("zbuffer.png").unwrap();
 
     image::ImageRgb8(buffer).flipv()
                             .save(render, image::PNG)
