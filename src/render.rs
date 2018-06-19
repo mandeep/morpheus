@@ -225,11 +225,10 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
             let mut point = Vector2::new(x as f64, y as f64);
             let mut color = image::Rgb([255, 255, 255]);
 
-            let c: Vector3<f64> = find_barycentric(
-                vector::project_to_3d(points[0]).remove_row(2),
-                vector::project_to_3d(points[1]).remove_row(2),
-                vector::project_to_3d(points[2]).remove_row(2),
-                &point);
+            let c: Vector3<f64> = find_barycentric(vector::project_to_3d(points[0]).remove_row(2),
+                                                   vector::project_to_3d(points[1]).remove_row(2),
+                                                   vector::project_to_3d(points[2]).remove_row(2),
+                                                   &point);
 
             let z = points[0][2] * c.x + points[1][2] * c.y + points[2][2] * c.z;
             let w = points[0][3] * c.x + points[1][3] * c.y + points[2][3] * c.z;
