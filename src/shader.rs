@@ -31,7 +31,7 @@ pub fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> M
     matrix * transpose
 }
 
-/// Create a projection matrix
+/// Create a projection matrix with the given coefficient
 pub fn projection(coefficient: f64) -> Matrix4<f64> {
     let mut matrix: Matrix4<f64> = Matrix4::identity();
     matrix.row_mut(3)[2] = coefficient;
@@ -96,6 +96,7 @@ pub struct GouraudShader {
 
 
 impl GouraudShader {
+    /// Position the vertices into their scene coordinates
     pub fn vertex(&mut self, coordinates: &wavefront::Object,
                   view_port: &Matrix4<f64>, projection: &Matrix4<f64>,
                   model_view: &Matrix4<f64>, light_vector: &Vector3<f64>,
@@ -114,8 +115,9 @@ impl GouraudShader {
         view_port * projection * model_view * gl_vertex
     }
 
-    pub fn fragment(&self, pixel: Vector3<f64>, color: &mut image::Rgb<u8>) -> bool {
-        let intensity: f64 = self.varying_intensity.dot(&pixel);
+    /// Set the light intensity of the given vertex as determined by the vertex shader
+    pub fn fragment(&self, vertex: Vector3<f64>, color: &mut image::Rgb<u8>) -> bool {
+        let intensity: f64 = self.varying_intensity.dot(&vertex);
 
         for i in 0..=2 {
             color[i] = (255.0 * intensity) as u8;
