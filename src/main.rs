@@ -30,7 +30,7 @@ fn main() {
     render::draw_triangle_mesh(&args[1], &mut buffer, &mut texture, &mut zbuffer, depth,
                                &light_vector, &eye, &center, &up);
 
-    let ref mut render = File::create(&args[3]).unwrap();
+    let ref mut render = File::create("output.png").unwrap();
     let ref mut zbuffer_render = File::create("zbuffer.png").unwrap();
 
     image::ImageRgb8(buffer).flipv()
