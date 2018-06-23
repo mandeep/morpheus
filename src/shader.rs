@@ -1,7 +1,7 @@
 extern crate nalgebra;
 extern crate image;
 
-use nalgebra::core::{Matrix4, Vector2, Vector3, Vector4};
+use nalgebra::core::{Matrix2x3, Matrix4, Vector2, Vector3, Vector4};
 
 use vector;
 use wavefront;
@@ -92,8 +92,8 @@ pub fn find_barycentric(a: Vector2<f64>, b: Vector2<f64>,
 
 pub struct GouraudShader {
     pub varying_intensity: Vector3<f64>,
+    pub varying_texture: Matrix2x3<f64>
 }
-
 
 impl GouraudShader {
     /// Position the vertices into their scene coordinates
@@ -102,13 +102,16 @@ impl GouraudShader {
                   model_view: &Matrix4<f64>, light_vector: &Vector3<f64>,
                   face_index: usize, vertex_index: usize) -> Vector4<f64> {
 
-        let normal_index = coordinates.normal_faces[face_index][vertex_index] as usize;
         let geometric_index = coordinates.geometric_faces[face_index][vertex_index] as usize;
+        let texture_index = coordinates.texture_faces[face_index][vertex_index] as usize;
+        let normal_index = coordinates.normal_faces[face_index][vertex_index] as usize;
 
         self.varying_intensity[vertex_index] = 0.0f64
             .max(coordinates.normal_vertices[normal_index].map(|n| n as f64)
                                                           .normalize()
                                                           .dot(&light_vector));
+
+        self.varying_texture.set_column(vertex_index, &coordinates.texture_vertices[texture_index]);
 
         let gl_vertex = vector::vectorize_to_4d(coordinates.geometric_vertices[geometric_index]);
 
@@ -116,11 +119,19 @@ impl GouraudShader {
     }
 
     /// Set the light intensity of the given vertex as determined by the vertex shader
-    pub fn fragment(&self, vertex: Vector3<f64>, color: &mut image::Rgb<u8>) -> bool {
+    pub fn fragment(&self, coordinates: &wavefront::Object, vertex: Vector3<f64>,
+                    color: &mut image::Rgb<u8>, texture: &mut image::RgbImage) -> bool {
+
         let intensity: f64 = self.varying_intensity.dot(&vertex);
+        let uv: Vector2<f64> = self.varying_texture * vertex;
+
+        let width = (uv.x as u32 * texture.width()) as usize;
+        let height = (uv.y as u32 * texture.height()) as usize;
+        let diffuse = coordinates.texture_vertices[coordinates.texture_faces[width][height] as usize];
+        let diffuse_pixel = texture.get_pixel(diffuse.x as u32, diffuse.y as u32);
 
         for i in 0..=2 {
-            color[i] = (255.0 * intensity) as u8;
+            color[i] = (diffuse_pixel[i] as f64 * intensity) as u8;
         }
 
         false

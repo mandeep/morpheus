@@ -3,7 +3,7 @@ extern crate nalgebra;
 
 use std::mem::swap;
 
-use nalgebra::core::{Vector2, Vector3, Vector4};
+use nalgebra::core::{Matrix2x3, Vector2, Vector3, Vector4};
 use nalgebra::geometry::{Point2};
 
 use shader;
@@ -125,7 +125,8 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>,
 /// ```
 ///
 fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
-                 zbuffer: &mut image::GrayImage, shader: shader::GouraudShader) {
+                 texture: &mut image::RgbImage, zbuffer: &mut image::GrayImage,
+                 shader: shader::GouraudShader, coordinates: &wavefront::Object) {
 
     let mut bounding_box_minimum: Vector2<f64> = Vector2::new(buffer.width() as f64 - 1.0,
                                                               buffer.height() as f64 - 1.0);
@@ -157,7 +158,7 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
             if c.x >= 0.0 && c.y >= 0.0 && c.z >= 0.0 &&
                 zbuffer.get_pixel(point.x as u32, point.y as u32)[0] < fragment_depth {
 
-                let discard: bool = shader.fragment(c, &mut color);
+                let discard: bool = shader.fragment(coordinates, c, &mut color, texture);
                 if !discard {
                     zbuffer.put_pixel(point.x as u32, point.y as u32, image::Luma([fragment_depth]));
                     buffer.put_pixel(point.x as u32, point.y as u32, color);
@@ -211,8 +212,8 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
 /// draw_triangle_mesh("coordinates.obj", &mut buffer, light_vector);
 /// ```
 pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
-                          zbuffer: &mut image::GrayImage, depth: u32,
-                          light_vector: &Vector3<f64>, eye: &Vector3<f64>,
+                          texture: &mut image::RgbImage, zbuffer: &mut image::GrayImage,
+                          depth: u32, light_vector: &Vector3<f64>, eye: &Vector3<f64>,
                           center: &Vector3<f64>, up: &Vector3<f64>) {
 
     let coordinates = wavefront::Object::new(filename);
@@ -224,7 +225,8 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
                                      depth);
 
     for face_index in 0..coordinates.geometric_faces.len() {
-        let mut shader = shader::GouraudShader{ varying_intensity: Vector3::zeros() };
+        let mut shader = shader::GouraudShader{ varying_intensity: Vector3::zeros(),
+                                                varying_texture: Matrix2x3::zeros() };
         let mut screen_coordinates: Vec<Vector4<f64>> = Vec::new();
 
         for vertex_index in 0..=2 {
@@ -233,7 +235,7 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
                                                   face_index, vertex_index));
         }
 
-        draw_triangle(&screen_coordinates, buffer, zbuffer, shader);
+        draw_triangle(&screen_coordinates, buffer, texture, zbuffer, shader, &coordinates);
     }
 }
 
