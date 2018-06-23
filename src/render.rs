@@ -141,7 +141,6 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
     for x in bounding_box_minimum.x as i32 ..= bounding_box_maximum.x as i32 {
         for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
             let mut point = Vector2::new(x as f64, y as f64);
-            let mut color = image::Rgb([255, 255, 255]);
 
             let c: Vector3<f64> = shader::find_barycentric(
                                         vector::project_to_3d(points[0]).remove_row(2),
@@ -157,11 +156,11 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
             if c.x >= 0.0 && c.y >= 0.0 && c.z >= 0.0 &&
                 zbuffer.get_pixel(point.x as u32, point.y as u32)[0] <= fragment_depth {
 
-                let discard: bool = shader.fragment(c, &mut color, texture);
-                if !discard {
-                    zbuffer.put_pixel(point.x as u32, point.y as u32, image::Luma([fragment_depth]));
-                    buffer.put_pixel(point.x as u32, point.y as u32, color);
-                }
+                let color = shader.fragment(c, texture);
+
+                zbuffer.put_pixel(point.x as u32, point.y as u32, image::Luma([fragment_depth]));
+                buffer.put_pixel(point.x as u32, point.y as u32, color);
+
             }
         }
     }
