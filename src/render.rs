@@ -154,9 +154,8 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
 
             let fragment_depth = 0.max(255.min((z / w + 0.5) as u8));
 
-
             if c.x >= 0.0 && c.y >= 0.0 && c.z >= 0.0 &&
-                zbuffer.get_pixel(point.x as u32, point.y as u32)[0] < fragment_depth {
+                zbuffer.get_pixel(point.x as u32, point.y as u32)[0] <= fragment_depth {
 
                 let discard: bool = shader.fragment(coordinates, c, &mut color, texture);
                 if !discard {
