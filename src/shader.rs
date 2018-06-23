@@ -119,19 +119,18 @@ impl GouraudShader {
     }
 
     /// Set the light intensity of the given vertex as determined by the vertex shader
-    pub fn fragment(&self, coordinates: &wavefront::Object, vertex: Vector3<f64>,
-                    color: &mut image::Rgb<u8>, texture: &image::RgbImage) -> bool {
+    pub fn fragment(&self, vertex: Vector3<f64>, color: &mut image::Rgb<u8>,
+                    texture: &image::RgbImage) -> bool {
 
         let intensity: f64 = self.varying_intensity.dot(&vertex);
         let uv: Vector2<f64> = self.varying_texture * vertex;
 
-        let width = (uv.x as u32 * texture.width()) as usize;
-        let height = (uv.y as u32 * texture.height()) as usize;
-        let diffuse = coordinates.texture_vertices[coordinates.texture_faces[width][height] as usize];
-        let diffuse_pixel = texture.get_pixel(diffuse.x as u32, diffuse.y as u32);
+        let width = (uv.x * texture.width() as f64) as usize;
+        let height = (uv.y * texture.height() as f64) as usize;
+        let texture_pixel = texture.get_pixel(width as u32, height as u32);
 
         for i in 0..=2 {
-            color[i] = (diffuse_pixel[i] as f64 * intensity) as u8;
+            color[i] = (texture_pixel[i] as f64 * intensity) as u8;
         }
 
         false

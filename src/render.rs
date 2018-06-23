@@ -126,7 +126,7 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>,
 ///
 fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
                  texture: &image::RgbImage, zbuffer: &mut image::GrayImage,
-                 shader: shader::GouraudShader, coordinates: &wavefront::Object) {
+                 shader: shader::GouraudShader) {
 
     let mut bounding_box_minimum: Vector2<f64> = Vector2::new(buffer.width() as f64 - 1.0,
                                                               buffer.height() as f64 - 1.0);
@@ -157,7 +157,7 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
             if c.x >= 0.0 && c.y >= 0.0 && c.z >= 0.0 &&
                 zbuffer.get_pixel(point.x as u32, point.y as u32)[0] <= fragment_depth {
 
-                let discard: bool = shader.fragment(coordinates, c, &mut color, texture);
+                let discard: bool = shader.fragment(c, &mut color, texture);
                 if !discard {
                     zbuffer.put_pixel(point.x as u32, point.y as u32, image::Luma([fragment_depth]));
                     buffer.put_pixel(point.x as u32, point.y as u32, color);
@@ -234,7 +234,7 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
                                                   face_index, vertex_index));
         }
 
-        draw_triangle(&screen_coordinates, buffer, texture, zbuffer, shader, &coordinates);
+        draw_triangle(&screen_coordinates, buffer, texture, zbuffer, shader);
     }
 }
 
