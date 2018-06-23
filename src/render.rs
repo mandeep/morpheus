@@ -125,7 +125,7 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>,
 /// ```
 ///
 fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
-                 texture: &mut image::RgbImage, zbuffer: &mut image::GrayImage,
+                 texture: &image::RgbImage, zbuffer: &mut image::GrayImage,
                  shader: shader::GouraudShader, coordinates: &wavefront::Object) {
 
     let mut bounding_box_minimum: Vector2<f64> = Vector2::new(buffer.width() as f64 - 1.0,
@@ -211,7 +211,7 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
 /// draw_triangle_mesh("coordinates.obj", &mut buffer, light_vector);
 /// ```
 pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
-                          texture: &mut image::RgbImage, zbuffer: &mut image::GrayImage,
+                          texture: &image::RgbImage, zbuffer: &mut image::GrayImage,
                           depth: u32, light_vector: &Vector3<f64>, eye: &Vector3<f64>,
                           center: &Vector3<f64>, up: &Vector3<f64>) {
 
