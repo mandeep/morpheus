@@ -120,14 +120,14 @@ impl GouraudShader {
 
     /// Set the light intensity of the given vertex as determined by the vertex shader
     pub fn fragment(&self, vertex: Vector3<f64>, texture: &image::RgbImage) -> image::Rgb<u8> {
-
-        let mut color = image::Rgb([255, 255, 255]);
         let intensity: f64 = self.varying_intensity.dot(&vertex);
         let uv: Vector2<f64> = self.varying_texture * vertex;
 
         let width = (uv.x * texture.width() as f64) as usize;
         let height = (uv.y * texture.height() as f64) as usize;
         let texture_pixel = texture.get_pixel(width as u32, height as u32);
+
+        let mut color = image::Rgb([255, 255, 255]);
 
         for i in 0..=2 {
             color[i] = (texture_pixel[i] as f64 * intensity) as u8;
