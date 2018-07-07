@@ -142,21 +142,27 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
         for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
             let mut point = Vector2::new(x as f64, y as f64);
 
-            let c: Vector3<f64> = shader::find_barycentric(
-                                        vector::project_to_3d(points[0]).remove_row(2),
-                                        vector::project_to_3d(points[1]).remove_row(2),
-                                        vector::project_to_3d(points[2]).remove_row(2),
-                                        &point);
+            let projected_points = points.clone()
+                                         .into_iter()
+                                         .map(|point| vector::project_to_3d(point).remove_row(2))
+                                         .collect();
 
-            let z = points[0][2] * c.x + points[1][2] * c.y + points[2][2] * c.z;
-            let w = points[0][3] * c.x + points[1][3] * c.y + points[2][3] * c.z;
+            let coordinate: Vector3<f64> = shader::find_barycentric(&projected_points, &point);
+
+            let z = points[0][2] * coordinate.x +
+                    points[1][2] * coordinate.y +
+                    points[2][2] * coordinate.z;
+
+            let w = points[0][3] * coordinate.x +
+                    points[1][3] * coordinate.y +
+                    points[2][3] * coordinate.z;
 
             let fragment_depth = 0.max(255.min((z / w + 0.5) as u8));
 
-            if c.x >= 0.0 && c.y >= 0.0 && c.z >= 0.0 &&
+            if coordinate.x >= 0.0 && coordinate.y >= 0.0 && coordinate.z >= 0.0 &&
                 zbuffer.get_pixel(point.x as u32, point.y as u32)[0] <= fragment_depth {
 
-                let color = shader.fragment(c, texture);
+                let color = shader.fragment(coordinate, texture);
 
                 zbuffer.put_pixel(point.x as u32, point.y as u32, image::Luma([fragment_depth]));
                 buffer.put_pixel(point.x as u32, point.y as u32, color);
