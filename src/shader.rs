@@ -70,13 +70,8 @@ pub fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<
 /// ```
 ///
 pub fn find_barycentric(points: &Vec<Vector2<f64>>, point: &Vector2<f64>) -> Vector3<f64> {
-    let v = Vector3::new(points[2][0] - points[0][0],
-                         points[1][0] - points[0][0],
-                         points[0][0] - point[0]);
-
-    let w = Vector3::new(points[2][1] - points[0][1],
-                         points[1][1] - points[0][1],
-                         points[0][1] - point[1]);
+    let v = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
+    let w = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
 
     let u = v.cross(&w);
 

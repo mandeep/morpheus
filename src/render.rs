@@ -149,13 +149,13 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
 
             let coordinate: Vector3<f64> = shader::find_barycentric(&projected_points, &point);
 
-            let z = points[0][2] * coordinate.x +
-                    points[1][2] * coordinate.y +
-                    points[2][2] * coordinate.z;
+            let z = points[0].z * coordinate.x +
+                    points[1].z * coordinate.y +
+                    points[2].z * coordinate.z;
 
-            let w = points[0][3] * coordinate.x +
-                    points[1][3] * coordinate.y +
-                    points[2][3] * coordinate.z;
+            let w = points[0].w * coordinate.x +
+                    points[1].w * coordinate.y +
+                    points[2].w * coordinate.z;
 
             let fragment_depth = 0.max(255.min((z / w + 0.5) as u8));
 
