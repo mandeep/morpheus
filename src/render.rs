@@ -125,7 +125,7 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>,
 /// ```
 ///
 fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
-                 texture: &image::RgbImage, zbuffer: &mut image::GrayImage,
+                 texture: &image::RgbImage, zbuffer: &mut Vec<f64>,
                  shader: shader::GouraudShader) {
 
     let mut bounding_box_minimum: Vector2<f64> = Vector2::new(buffer.width() as f64 - 1.0,
@@ -140,7 +140,7 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
     }
     for x in bounding_box_minimum.x as i32 ..= bounding_box_maximum.x as i32 {
         for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
-            let mut point = Vector2::new(x as f64, y as f64);
+            let mut point = Vector4::new(x as f64, y as f64, 0.0, 0.0);
 
             let projected_points = points.clone()
                                          .into_iter()
@@ -149,22 +149,21 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
 
             let coordinate: Vector3<f64> = shader::find_barycentric(&projected_points, &point);
 
-            let z = points[0].z * coordinate.x +
-                    points[1].z * coordinate.y +
-                    points[2].z * coordinate.z;
+            for i in 0..=2 {
+                point.z += points[i].z * coordinate[i];
+            }
 
-            let w = points[0].w * coordinate.x +
-                    points[1].w * coordinate.y +
-                    points[2].w * coordinate.z;
+            for j in 0..=2 {
+                point.w += points[j].w * coordinate[j];
+            }
 
-            let fragment_depth = 0.max(255.min((z / w + 0.5) as u8));
 
             if coordinate.x >= 0.0 && coordinate.y >= 0.0 && coordinate.z >= 0.0 &&
-                zbuffer.get_pixel(point.x as u32, point.y as u32)[0] <= fragment_depth {
+                zbuffer[(point.x as u32 + (point.y as u32 * buffer.width())) as usize] < point.z / point.w {
 
                 let color = shader.fragment(coordinate, texture);
 
-                zbuffer.put_pixel(point.x as u32, point.y as u32, image::Luma([fragment_depth]));
+                zbuffer[(point.x as u32 + (point.y as u32 * buffer.width())) as usize] = point.z / point.w;
                 buffer.put_pixel(point.x as u32, point.y as u32, color);
 
             }
@@ -216,11 +215,12 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
 /// draw_triangle_mesh("coordinates.obj", &mut buffer, light_vector);
 /// ```
 pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
-                          texture: &image::RgbImage, zbuffer: &mut image::GrayImage,
-                          depth: u32, light_vector: &Vector3<f64>, eye: &Vector3<f64>,
+                          texture: &image::RgbImage, depth: u32,
+                          light_vector: &Vector3<f64>, eye: &Vector3<f64>,
                           center: &Vector3<f64>, up: &Vector3<f64>) {
 
     let coordinates = wavefront::Object::new(filename);
+    let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height() * 2) as usize];
 
     let model_view = shader::lookat(eye, center, up);
     let projection = shader::projection(-1.0 / (eye - center).norm());
@@ -239,7 +239,7 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
                                                   face_index, vertex_index));
         }
 
-        draw_triangle(&screen_coordinates, buffer, texture, zbuffer, shader);
+        draw_triangle(&screen_coordinates, buffer, texture, &mut zbuffer, shader);
     }
 }
 
