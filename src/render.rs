@@ -159,11 +159,11 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
 
 
             if coordinate.x >= 0.0 && coordinate.y >= 0.0 && coordinate.z >= 0.0 &&
-                zbuffer[(point.x as u32 + (point.y as u32 * buffer.width())) as usize] < point.z / point.w {
+                zbuffer[(point.x + (point.y * buffer.width() as f64)) as usize] < point.z / point.w {
 
                 let color = shader.fragment(coordinate, texture);
 
-                zbuffer[(point.x as u32 + (point.y as u32 * buffer.width())) as usize] = point.z / point.w;
+                zbuffer[(point.x + (point.y * buffer.width() as f64)) as usize] = point.z / point.w;
                 buffer.put_pixel(point.x as u32, point.y as u32, color);
 
             }
