@@ -69,7 +69,7 @@ pub fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<
 /// let barycentric_coordinates: Point3<f64> = find_barycentric(&points, &point);
 /// ```
 ///
-pub fn find_barycentric(points: &Vec<Vector2<f64>>, point: &Vector2<f64>) -> Vector3<f64> {
+pub fn find_barycentric(points: &Vec<Vector2<f64>>, point: &Vector4<f64>) -> Vector3<f64> {
     let v = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
     let w = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
 
