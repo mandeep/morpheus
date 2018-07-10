@@ -61,6 +61,7 @@ fn draw_line(mut x0: i32, mut y0: i32, mut x1: i32, mut y1: i32,
     }
 }
 
+
 /// Fill triangle in the given color with points t0, t1, and t2
 ///
 /// # Examples
@@ -112,6 +113,27 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>,
     }
 }
 
+
+/// Find the bounding box of the given points
+fn find_bounding_box(buffer: &mut image::RgbImage,
+                     points: &Vec<Vector2<f64>>) -> (Vector2<i32>, Vector2<i32>) {
+
+    let mut bounding_box_minimum: Vector2<f64> = Vector2::new(buffer.width() as f64 - 1.0,
+                                                              buffer.height() as f64 - 1.0);
+    let mut bounding_box_maximum: Vector2<f64> = Vector2::zeros();
+
+    for point in points {
+            bounding_box_minimum.x = bounding_box_minimum.x.min(point.x);
+            bounding_box_minimum.y = bounding_box_minimum.y.min(point.y);
+
+            bounding_box_maximum.x = bounding_box_maximum.x.max(point.x);
+            bounding_box_maximum.y = bounding_box_maximum.y.max(point.y);
+    }
+
+    (bounding_box_minimum.map(|n| n as i32), bounding_box_maximum.map(|n| n as i32))
+}
+
+
 /// Draw a filled triangle with the given points in the given color
 ///
 /// # Examples
@@ -128,35 +150,21 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
                  texture: &image::RgbImage, zbuffer: &mut Vec<f64>,
                  shader: shader::GouraudShader) {
 
-    let mut bounding_box_minimum: Vector2<f64> = Vector2::new(buffer.width() as f64 - 1.0,
-                                                              buffer.height() as f64 - 1.0);
-    let mut bounding_box_maximum: Vector2<f64> = Vector2::new(0.0, 0.0);
+    let projected_points = points.clone()
+                                 .into_iter()
+                                 .map(|point| vector::project_to_3d(point).remove_row(2))
+                                 .collect();
 
-    for i in 0..=2 {
-        for j in 0..=1 {
-            bounding_box_minimum[j] = bounding_box_minimum[j].min(points[i][j] / points[i][3]);
-            bounding_box_maximum[j] = bounding_box_maximum[j].max(points[i][j] / points[i][3]);
-        }
-    }
-    for x in bounding_box_minimum.x as i32 ..= bounding_box_maximum.x as i32 {
-        for y in bounding_box_minimum.y as i32 ..= bounding_box_maximum.y as i32 {
+    let (bounding_box_minimum, bounding_box_maximum) = find_bounding_box(buffer, &projected_points);
+
+    for x in bounding_box_minimum.x ..= bounding_box_maximum.x  {
+        for y in bounding_box_minimum.y ..= bounding_box_maximum.y {
             let mut point = Vector4::new(x as f64, y as f64, 0.0, 0.0);
-
-            let projected_points = points.clone()
-                                         .into_iter()
-                                         .map(|point| vector::project_to_3d(point).remove_row(2))
-                                         .collect();
 
             let coordinate: Vector3<f64> = shader::find_barycentric(&projected_points, &point);
 
-            for i in 0..=2 {
-                point.z += points[i].z * coordinate[i];
-            }
-
-            for j in 0..=2 {
-                point.w += points[j].w * coordinate[j];
-            }
-
+            (0..=2).for_each(|i| point.z += points[i].z * coordinate[i]);
+            (0..=2).for_each(|j| point.w += points[j].w * coordinate[j]);
 
             if coordinate.x >= 0.0 && coordinate.y >= 0.0 && coordinate.z >= 0.0 &&
                 zbuffer[(point.x + (point.y * buffer.width() as f64)) as usize] < point.z / point.w {
@@ -170,6 +178,7 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
         }
     }
 }
+
 
 /// Draw a wire mesh on the given ImageBuffer with the coordinates from the given file
 ///
@@ -201,6 +210,7 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
         }
     }
 }
+
 
 /// Draw a triangle mesh on the given ImageBuffer with the illumination provided by the given vector
 ///
