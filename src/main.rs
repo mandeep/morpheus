@@ -22,7 +22,7 @@ fn main() {
 
     let texture = image::open(&args[2]).unwrap().flipv().to_rgb();
 
-    let eye = Vector3::new(30.0, 20.0, 110.0);
+    let eye = Vector3::new(0.0, 30.0, 100.0);
     let center = Vector3::new(0.0, 0.0, 0.0);
     let up = Vector3::new(0.0, 1.0, 0.0);
     let light_vector = Vector3::new(5.0, 5.0, 20.0).normalize();
