@@ -147,7 +147,7 @@ fn find_bounding_box(points: &Vec<Vector2<f64>>,
 ///
 fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
                  texture: &image::RgbImage, zbuffer: &mut Vec<f64>,
-                 shader: shader::GouraudShader) {
+                 shader: &shader::GouraudShader) {
 
     let projected_points = &points.iter()
                                   .map(|&point| vector::project_to_3d(point).remove_row(2))
@@ -247,7 +247,7 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
                                                   face_index, vertex_index));
         }
 
-        draw_triangle(&screen_coordinates, buffer, texture, &mut zbuffer, shader);
+        draw_triangle(&screen_coordinates, buffer, texture, &mut zbuffer, &shader);
     }
 }
 
