@@ -115,8 +115,8 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>,
 
 
 /// Find the bounding box of the given points
-fn find_bounding_box(buffer: &mut image::RgbImage,
-                     points: &Vec<Vector2<f64>>) -> (Vector2<u32>, Vector2<u32>) {
+fn find_bounding_box(points: &Vec<Vector2<f64>>,
+                     buffer: &mut image::RgbImage) -> (Vector2<u32>, Vector2<u32>) {
 
     let mut bounding_box_minimum = Vector2::new(buffer.width() - 1, buffer.height() - 1);
     let mut bounding_box_maximum = Vector2::new(0, 0);
@@ -153,7 +153,7 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
                                   .map(|&point| vector::project_to_3d(point).remove_row(2))
                                   .collect();
 
-    let (bounding_box_minimum, bounding_box_maximum) = find_bounding_box(buffer, &projected_points);
+    let (bounding_box_minimum, bounding_box_maximum) = find_bounding_box(&projected_points, buffer);
 
     for x in bounding_box_minimum.x ..= bounding_box_maximum.x  {
         for y in bounding_box_minimum.y ..= bounding_box_maximum.y {
