@@ -116,21 +116,21 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>,
 
 /// Find the bounding box of the given points
 fn find_bounding_box(buffer: &mut image::RgbImage,
-                     points: &Vec<Vector2<f64>>) -> (Vector2<i32>, Vector2<i32>) {
+                     points: &Vec<Vector2<f64>>) -> (Vector2<u32>, Vector2<u32>) {
 
-    let mut bounding_box_minimum: Vector2<f64> = Vector2::new(buffer.width() as f64 - 1.0,
-                                                              buffer.height() as f64 - 1.0);
-    let mut bounding_box_maximum: Vector2<f64> = Vector2::zeros();
+    let mut bounding_box_minimum: Vector2<u32> = Vector2::new(buffer.width() - 1,
+                                                              buffer.height() - 1);
+    let mut bounding_box_maximum: Vector2<u32> = Vector2::zeros();
 
     for point in points {
-            bounding_box_minimum.x = bounding_box_minimum.x.min(point.x);
-            bounding_box_minimum.y = bounding_box_minimum.y.min(point.y);
+            bounding_box_minimum.x = bounding_box_minimum.x.min(point.x as u32);
+            bounding_box_minimum.y = bounding_box_minimum.y.min(point.y as u32);
 
-            bounding_box_maximum.x = bounding_box_maximum.x.max(point.x);
-            bounding_box_maximum.y = bounding_box_maximum.y.max(point.y);
+            bounding_box_maximum.x = bounding_box_maximum.x.max(point.x as u32);
+            bounding_box_maximum.y = bounding_box_maximum.y.max(point.y as u32);
     }
 
-    (bounding_box_minimum.map(|n| n as i32), bounding_box_maximum.map(|n| n as i32))
+    (bounding_box_minimum, bounding_box_maximum)
 }
 
 
