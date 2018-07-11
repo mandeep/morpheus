@@ -228,7 +228,7 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
                           center: &Vector3<f64>, up: &Vector3<f64>) {
 
     let coordinates = wavefront::Object::new(filename);
-    let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height() * 2) as usize];
+    let mut zbuffer = vec![-1.0; (buffer.width() * buffer.height() + 1) as usize];
 
     let model_view = shader::lookat(eye, center, up);
     let projection = shader::projection(-1.0 / (eye - center).norm());
