@@ -118,9 +118,8 @@ fn fill_triangle(mut t0: Point2<i32>, mut t1: Point2<i32>, mut t2: Point2<i32>,
 fn find_bounding_box(buffer: &mut image::RgbImage,
                      points: &Vec<Vector2<f64>>) -> (Vector2<u32>, Vector2<u32>) {
 
-    let mut bounding_box_minimum: Vector2<u32> = Vector2::new(buffer.width() - 1,
-                                                              buffer.height() - 1);
-    let mut bounding_box_maximum: Vector2<u32> = Vector2::zeros();
+    let mut bounding_box_minimum = Vector2::new(buffer.width() - 1, buffer.height() - 1);
+    let mut bounding_box_maximum = Vector2::new(0, 0);
 
     for point in points {
             bounding_box_minimum.x = bounding_box_minimum.x.min(point.x as u32);
