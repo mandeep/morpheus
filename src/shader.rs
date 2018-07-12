@@ -70,15 +70,15 @@ pub fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<
 /// ```
 ///
 pub fn find_barycentric(points: &Vec<Vector2<f64>>, point: &Vector4<f64>) -> Vector3<f64> {
-    let v = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
-    let w = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
+    let u = Vector3::new(points[2].x - points[0].x, points[1].x - points[0].x, points[0].x - point.x);
+    let v = Vector3::new(points[2].y - points[0].y, points[1].y - points[0].y, points[0].y - point.y);
 
-    let u = v.cross(&w);
+    let w = u.cross(&v);
 
-    if (u.z).abs() < 0.01 {
+    if (w.z).abs() < 0.01 {
         return Vector3::new(-1.0, 1.0, 1.0);
     } else {
-        return Vector3::new(1.0 - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
+        return Vector3::new(1.0 - (w.x + w.y) / w.z, w.y / w.z, w.x / w.z);
     }
 
 }
@@ -89,6 +89,11 @@ pub struct GouraudShader {
 }
 
 impl GouraudShader {
+    /// Create a new instance of a GouraudShader
+    pub fn new() -> GouraudShader {
+        GouraudShader { varying_intensity: Vector3::zeros(), varying_texture: Matrix2x3::zeros() }
+    }
+
     /// Position the vertices into their scene coordinates
     pub fn vertex(&mut self, coordinates: &wavefront::Object,
                   view_port: &Matrix4<f64>, projection: &Matrix4<f64>,

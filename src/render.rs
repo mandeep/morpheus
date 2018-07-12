@@ -3,7 +3,7 @@ extern crate nalgebra;
 
 use std::mem::swap;
 
-use nalgebra::core::{Matrix2x3, Vector2, Vector3, Vector4};
+use nalgebra::core::{Vector2, Vector3, Vector4};
 use nalgebra::geometry::{Point2};
 
 use shader;
@@ -237,8 +237,8 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
                                      depth);
 
     for face_index in 0..coordinates.geometric_faces.len() {
-        let mut shader = shader::GouraudShader{ varying_intensity: Vector3::zeros(),
-                                                varying_texture: Matrix2x3::zeros() };
+        let mut shader = shader::GouraudShader::new();
+
         let mut screen_coordinates: Vec<Vector4<f64>> = Vec::new();
 
         for vertex_index in 0..=2 {
