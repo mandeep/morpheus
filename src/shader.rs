@@ -31,6 +31,7 @@ pub fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> M
     matrix * transpose
 }
 
+
 /// Create a projection matrix with the given coefficient
 pub fn projection(coefficient: f64) -> Matrix4<f64> {
     let mut matrix: Matrix4<f64> = Matrix4::identity();
@@ -39,6 +40,7 @@ pub fn projection(coefficient: f64) -> Matrix4<f64> {
     matrix
 
 }
+
 
 /// Map the bi-unit cube of [-1, 1] * [-1, 1] * [-1, 1] to the dimensions of the image
 ///
@@ -58,6 +60,7 @@ pub fn viewport(x: u32, y: u32, width: u32, height: u32, depth: u32) -> Matrix4<
 
     matrix
 }
+
 
 /// Find the barycentric coordinates of the given point with respect to the given triangle
 ///
@@ -83,22 +86,40 @@ pub fn find_barycentric(points: &Vec<Vector2<f64>>, point: &Vector4<f64>) -> Vec
 
 }
 
+
+/// Shader trait can be used to implement multiple shaders
+pub trait Shader {
+    fn vertex(&mut self, coordinates: &wavefront::Object,
+                  view_port: &Matrix4<f64>, projection: &Matrix4<f64>,
+                  model_view: &Matrix4<f64>, light_vector: &Vector3<f64>,
+                  face_index: usize, vertex_index: usize) -> Vector4<f64>;
+
+
+    fn fragment(&self, vertex: Vector3<f64>, texture: &image::RgbImage) -> image::Rgb<u8>;
+}
+
+
 pub struct GouraudShader {
     pub varying_intensity: Vector3<f64>,
     pub varying_texture: Matrix2x3<f64>
 }
+
 
 impl GouraudShader {
     /// Create a new instance of a GouraudShader
     pub fn new() -> GouraudShader {
         GouraudShader { varying_intensity: Vector3::zeros(), varying_texture: Matrix2x3::zeros() }
     }
+}
+
+
+impl Shader for GouraudShader {
 
     /// Position the vertices into their scene coordinates
-    pub fn vertex(&mut self, coordinates: &wavefront::Object,
-                  view_port: &Matrix4<f64>, projection: &Matrix4<f64>,
-                  model_view: &Matrix4<f64>, light_vector: &Vector3<f64>,
-                  face_index: usize, vertex_index: usize) -> Vector4<f64> {
+    fn vertex(&mut self, coordinates: &wavefront::Object,
+              view_port: &Matrix4<f64>, projection: &Matrix4<f64>,
+              model_view: &Matrix4<f64>, light_vector: &Vector3<f64>,
+              face_index: usize, vertex_index: usize) -> Vector4<f64> {
 
         let geometric_index = coordinates.geometric_faces[face_index][vertex_index] as usize;
         let texture_index = coordinates.texture_faces[face_index][vertex_index] as usize;
@@ -117,7 +138,7 @@ impl GouraudShader {
     }
 
     /// Set the light intensity of the given vertex as determined by the vertex shader
-    pub fn fragment(&self, vertex: Vector3<f64>, texture: &image::RgbImage) -> image::Rgb<u8> {
+    fn fragment(&self, vertex: Vector3<f64>, texture: &image::RgbImage) -> image::Rgb<u8> {
         let intensity: f64 = self.varying_intensity.dot(&vertex);
         let uv: Vector2<f64> = self.varying_texture * vertex;
 

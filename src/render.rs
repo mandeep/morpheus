@@ -7,6 +7,7 @@ use nalgebra::core::{Vector2, Vector3, Vector4};
 use nalgebra::geometry::{Point2};
 
 use shader;
+use shader::Shader;
 use wavefront;
 use vector;
 
@@ -147,7 +148,7 @@ fn find_bounding_box(points: &Vec<Vector2<f64>>,
 ///
 fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
                  texture: &image::RgbImage, zbuffer: &mut Vec<f64>,
-                 shader: &shader::GouraudShader) {
+                 shader: &shader::Shader) {
 
     let projected_points = &points.iter()
                                   .map(|&point| vector::project_to_3d(point).remove_row(2))
