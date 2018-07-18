@@ -102,7 +102,7 @@ pub trait Shader {
 pub struct FlatShader {
     pub varying_intensity: Vector3<f64>,
     pub varying_texture: Matrix2x3<f64>,
-    pub varying_coordinates: Vec<Vector3<f64>>
+    pub world_coordinates: Vec<Vector3<f64>>
 }
 
 
@@ -111,7 +111,7 @@ impl FlatShader {
     pub fn new() -> FlatShader {
         FlatShader { varying_intensity: Vector3::zeros(),
                      varying_texture: Matrix2x3::zeros(),
-                     varying_coordinates: vec![Vector3::zeros(), Vector3::zeros(), Vector3::zeros()] }
+                     world_coordinates: vec![Vector3::zeros(); 3] }
     }
 }
 
@@ -133,7 +133,7 @@ impl Shader for FlatShader {
         let projected_coordinate = vector::project_to_3d(projection * model_view * gl_vertex);
 
         for i in 0..=2 {
-            self.varying_coordinates[vertex_index][i] = projected_coordinate[i];
+            self.world_coordinates[vertex_index][i] = projected_coordinate[i];
         }
 
         view_port * projection * model_view * gl_vertex
@@ -141,12 +141,24 @@ impl Shader for FlatShader {
 
     /// Set the light intensity of the given vertex as determined by the vertex shader
     fn fragment(&self, vertex: Vector3<f64>, texture: &image::RgbImage) -> image::Rgb<u8> {
-        let normal = (self.varying_coordinates[1] - self.varying_coordinates[0])
-            .cross(&(self.varying_coordinates[2] - self.varying_coordinates[0])).normalize();
+        let normal = (self.world_coordinates[1] - self.world_coordinates[0])
+            .cross(&(self.world_coordinates[2] - self.world_coordinates[0])).normalize();
 
         let intensity = normal.dot(&self.varying_intensity);
 
-        image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8])
+        let uv: Vector2<f64> = self.varying_texture * vertex;
+
+        let width = (uv.x * texture.width() as f64) as usize;
+        let height = (uv.y * texture.height() as f64) as usize;
+        let texture_pixel = texture.get_pixel(width as u32, height as u32);
+
+        let mut color = image::Rgb([255, 255, 255]);
+
+        for i in 0..=2 {
+            color[i] = (texture_pixel[i] as f64 * intensity) as u8;
+        }
+
+        color
     }
 }
 
