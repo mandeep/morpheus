@@ -238,7 +238,7 @@ pub fn draw_triangle_mesh(filename: &str, buffer: &mut image::RgbImage,
                                      depth);
 
     for face_index in 0..coordinates.geometric_faces.len() {
-        let mut shader = shader::GouraudShader::new();
+        let mut shader = shader::FlatShader::new();
 
         let mut screen_coordinates: Vec<Vector4<f64>> = Vec::new();
 

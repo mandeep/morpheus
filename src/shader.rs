@@ -99,6 +99,58 @@ pub trait Shader {
 }
 
 
+pub struct FlatShader {
+    pub varying_intensity: Vector3<f64>,
+    pub varying_texture: Matrix2x3<f64>,
+    pub varying_coordinates: Vec<Vector3<f64>>
+}
+
+
+impl FlatShader {
+    /// Create a new instance of a FlatShader
+    pub fn new() -> FlatShader {
+        FlatShader { varying_intensity: Vector3::zeros(),
+                     varying_texture: Matrix2x3::zeros(),
+                     varying_coordinates: vec![Vector3::zeros(), Vector3::zeros(), Vector3::zeros()] }
+    }
+}
+
+
+impl Shader for FlatShader {
+    /// Position the vertices into their scene coordinates
+    fn vertex(&mut self, coordinates: &wavefront::Object,
+                  view_port: &Matrix4<f64>, projection: &Matrix4<f64>,
+                  model_view: &Matrix4<f64>, light_vector: &Vector3<f64>,
+                  face_index: usize, vertex_index: usize) -> Vector4<f64> {
+
+        let geometric_index = coordinates.geometric_faces[face_index][vertex_index] as usize;
+        let texture_index = coordinates.texture_faces[face_index][vertex_index] as usize;
+
+        self.varying_texture.set_column(vertex_index, &coordinates.texture_vertices[texture_index]);
+        self.varying_intensity = light_vector.clone();
+
+        let gl_vertex = vector::vectorize_to_4d(coordinates.geometric_vertices[geometric_index]);
+        let projected_coordinate = vector::project_to_3d(projection * model_view * gl_vertex);
+
+        for i in 0..=2 {
+            self.varying_coordinates[vertex_index][i] = projected_coordinate[i];
+        }
+
+        view_port * projection * model_view * gl_vertex
+    }
+
+    /// Set the light intensity of the given vertex as determined by the vertex shader
+    fn fragment(&self, vertex: Vector3<f64>, texture: &image::RgbImage) -> image::Rgb<u8> {
+        let normal = (self.varying_coordinates[1] - self.varying_coordinates[0])
+            .cross(&(self.varying_coordinates[2] - self.varying_coordinates[0])).normalize();
+
+        let intensity = normal.dot(&self.varying_intensity);
+
+        image::Rgb([(255.0 * intensity) as u8, (255.0 * intensity) as u8, (255.0 * intensity) as u8])
+    }
+}
+
+
 pub struct GouraudShader {
     pub varying_intensity: Vector3<f64>,
     pub varying_texture: Matrix2x3<f64>
