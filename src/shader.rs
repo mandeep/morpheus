@@ -127,7 +127,7 @@ impl Shader for FlatShader {
         let texture_index = coordinates.texture_faces[face_index][vertex_index] as usize;
 
         self.varying_texture.set_column(vertex_index, &coordinates.texture_vertices[texture_index]);
-        self.varying_intensity = light_vector.clone();
+        self.varying_intensity = *light_vector;
 
         let gl_vertex = vector::vectorize_to_4d(coordinates.geometric_vertices[geometric_index]);
         let projected_coordinate = vector::project_to_3d(projection * model_view * gl_vertex);
