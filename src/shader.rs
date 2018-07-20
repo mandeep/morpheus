@@ -150,15 +150,11 @@ impl Shader for FlatShader {
 
         let width = (uv.x * texture.width() as f64) as usize;
         let height = (uv.y * texture.height() as f64) as usize;
-        let texture_pixel = texture.get_pixel(width as u32, height as u32);
+        let mut texture_pixel = *texture.get_pixel(width as u32, height as u32);
 
-        let mut color = image::Rgb([255, 255, 255]);
+        (0..=2).for_each(|i| {texture_pixel[i] = (texture_pixel[i] as f64 * intensity) as u8;});
 
-        for i in 0..=2 {
-            color[i] = (texture_pixel[i] as f64 * intensity) as u8;
-        }
-
-        color
+        texture_pixel
     }
 }
 
@@ -178,7 +174,6 @@ impl GouraudShader {
 
 
 impl Shader for GouraudShader {
-
     /// Position the vertices into their scene coordinates
     fn vertex(&mut self, coordinates: &wavefront::Object,
               view_port: &Matrix4<f64>, projection: &Matrix4<f64>,
@@ -208,15 +203,11 @@ impl Shader for GouraudShader {
 
         let width = (uv.x * texture.width() as f64) as usize;
         let height = (uv.y * texture.height() as f64) as usize;
-        let texture_pixel = texture.get_pixel(width as u32, height as u32);
+        let mut texture_pixel = *texture.get_pixel(width as u32, height as u32);
 
-        let mut color = image::Rgb([255, 255, 255]);
+        (0..=2).for_each(|i| {texture_pixel[i] = (texture_pixel[i] as f64 * intensity) as u8;});
 
-        for i in 0..=2 {
-            color[i] = (texture_pixel[i] as f64 * intensity) as u8;
-        }
-
-        color
+        texture_pixel
     }
 }
 
