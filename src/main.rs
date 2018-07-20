@@ -22,10 +22,10 @@ fn main() {
 
     let texture = image::open(&args[2]).unwrap().flipv().to_rgb();
 
-    let eye = Vector3::new(20.0, 20.0, 100.0);
+    let eye = Vector3::new(0.0, 20.0, 100.0);
     let center = Vector3::new(0.0, 0.0, 0.0);
     let up = Vector3::new(0.0, 1.0, 0.0);
-    let light_vector = Vector3::new(0.0, 0.0, 1.0).normalize();
+    let light_vector = Vector3::new(0.0, 1.0, 0.0).normalize();
 
     render::draw_triangle_mesh(&args[1], &mut buffer, &texture, depth,
                                &light_vector, &eye, &center, &up);
