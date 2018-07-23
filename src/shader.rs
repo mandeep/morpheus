@@ -132,9 +132,7 @@ impl Shader for FlatShader {
         let gl_vertex = vector::vectorize_to_4d(coordinates.geometric_vertices[geometric_index]);
         let projected_coordinate = vector::project_to_3d(projection * model_view * gl_vertex);
 
-        for i in 0..=2 {
-            self.world_coordinates[vertex_index][i] = projected_coordinate[i];
-        }
+        (0..=2).for_each(|i| { self.world_coordinates[vertex_index][i] = projected_coordinate[i];});
 
         view_port * projection * model_view * gl_vertex
     }
