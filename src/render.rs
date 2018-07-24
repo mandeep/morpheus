@@ -288,8 +288,8 @@ mod tests {
 
         assert_eq!(test_file.height(), output_file.height());
 
-        for x in 0..1599 {
-            for y in 0..1599 {
+        for x in 0..width {
+            for y in 0..height {
                 assert_eq!(test_file.get_pixel(x, y), output_file.get_pixel(x, y));
             }
         }
@@ -319,8 +319,8 @@ mod tests {
 
         assert_eq!(test_file.height(), output_file.height());
 
-        for x in 0..1599 {
-            for y in 0..1599 {
+        for x in 0..width {
+            for y in 0..height {
                 assert_eq!(test_file.get_pixel(x, y), output_file.get_pixel(x, y));
             }
         }
