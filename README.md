@@ -7,3 +7,4 @@ based on the [Tiny Renderer](https://github.com/ssloy/tinyrenderer/) wiki course
 
 ![Rendered Porsche](rendered_porsche.png)
 ![Rendered Soccer Ball](rendered_ball.png)
+![Rendered Banana](rendered_banana.png)
