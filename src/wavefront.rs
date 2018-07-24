@@ -73,7 +73,9 @@ impl Object {
                                         .map(|n| n.parse().unwrap())
                                         .collect::<Vec<f64>>();
 
-                geometric_vertices.push(Vector3::new(v_coordinates[0], v_coordinates[1], v_coordinates[2]));
+                geometric_vertices.push(Vector3::new(v_coordinates[0],
+                                                     v_coordinates[1],
+                                                     v_coordinates[2]));
             }
             else if line.starts_with("vt ") {
                 let vt_coordinates = line.split_at(3).1
@@ -89,7 +91,9 @@ impl Object {
                                          .map(|n| n.parse().unwrap())
                                          .collect::<Vec<f64>>();
 
-                normal_vertices.push(Vector3::new(vn_coordinates[0], vn_coordinates[1], vn_coordinates[2]));
+                normal_vertices.push(Vector3::new(vn_coordinates[0],
+                                                  vn_coordinates[1],
+                                                  vn_coordinates[2]));
             }
             else if line.starts_with("f ") {
                 let f_coordinates = line.split_at(2).1
@@ -97,11 +101,34 @@ impl Object {
                                         .map(|n| n.parse().unwrap())
                                         .collect::<Vec<i32>>();
 
-                geometric_faces.push(Vector3::new(f_coordinates[0] - 1, f_coordinates[3] - 1, f_coordinates[6] - 1));
-                texture_faces.push(Vector3::new(f_coordinates[1] - 1, f_coordinates[4] - 1, f_coordinates[7] - 1));
-                normal_faces.push(Vector3::new(f_coordinates[2] - 1, f_coordinates[5] - 1, f_coordinates[8] - 1));
+                geometric_faces.push(Vector3::new(f_coordinates[0] - 1,
+                                                  f_coordinates[3] - 1,
+                                                  f_coordinates[6] - 1));
+
+                texture_faces.push(Vector3::new(f_coordinates[1] - 1,
+                                                f_coordinates[4] - 1,
+                                                f_coordinates[7] - 1));
+
+                normal_faces.push(Vector3::new(f_coordinates[2] - 1,
+                                               f_coordinates[5] - 1,
+                                               f_coordinates[8] - 1));
+
+                if f_coordinates.len() == 12 {
+                    geometric_faces.push(Vector3::new(f_coordinates[0] - 1,
+                                                      f_coordinates[6] - 1,
+                                                      f_coordinates[9] - 1));
+
+                    texture_faces.push(Vector3::new(f_coordinates[1] - 1,
+                                                    f_coordinates[7] - 1,
+                                                    f_coordinates[10] - 1));
+
+                    normal_faces.push(Vector3::new(f_coordinates[2] - 1,
+                                                   f_coordinates[8] - 1,
+                                                   f_coordinates[11] - 1));
+                }
             }
         }
+
         Object { geometric_vertices: geometric_vertices, geometric_faces: geometric_faces,
                  texture_vertices: texture_vertices, texture_faces: texture_faces,
                  normal_vertices: normal_vertices, normal_faces: normal_faces }
