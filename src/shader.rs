@@ -157,6 +157,65 @@ impl Shader for FlatShader {
 }
 
 
+pub struct CelShader {
+    pub varying_intensity: Vector3<f64>,
+    pub varying_texture: Matrix2x3<f64>,
+}
+
+
+impl CelShader {
+    /// Create a new instance of a CelShader
+    pub fn new() -> CelShader {
+        CelShader { varying_intensity: Vector3::zeros(),
+                    varying_texture: Matrix2x3::zeros() }
+
+    }
+}
+
+
+impl Shader for CelShader {
+    /// Position the vertices into their scene coordinates
+    fn vertex(&mut self, coordinates: &wavefront::Object,
+                  view_port: &Matrix4<f64>, projection: &Matrix4<f64>,
+                  model_view: &Matrix4<f64>, light_vector: &Vector3<f64>,
+                  face_index: usize, vertex_index: usize) -> Vector4<f64> {
+
+        let geometric_index = coordinates.geometric_faces[face_index][vertex_index] as usize;
+        let texture_index = coordinates.texture_faces[face_index][vertex_index] as usize;
+        let normal_index = coordinates.normal_faces[face_index][vertex_index] as usize;
+
+        self.varying_intensity[vertex_index] = 0.0f64
+            .max(coordinates.normal_vertices[normal_index].map(|n| n as f64)
+                                                          .normalize()
+                                                          .dot(&light_vector));
+
+        self.varying_texture.set_column(vertex_index, &coordinates.texture_vertices[texture_index]);
+
+        let gl_vertex = vector::vectorize_to_4d(coordinates.geometric_vertices[geometric_index]);
+
+        view_port * projection * model_view * gl_vertex
+    }
+
+    /// Set the light intensity of the given vertex as determined by the vertex shader
+    fn fragment(&self, vertex: Vector3<f64>, texture: &image::RgbImage) -> image::Rgb<u8> {
+        let mut intensity: f64 = self.varying_intensity.dot(&vertex);
+        let uv: Vector2<f64> = self.varying_texture * vertex;
+
+        if intensity > 0.95 { intensity = 1.0; }
+        else if intensity > 0.50 { intensity = 0.70; }
+        else if intensity > 0.10 { intensity = 0.35; }
+        else { intensity = 0.20; }
+
+        let width = (uv.x * texture.width() as f64) as usize;
+        let height = (uv.y * texture.height() as f64) as usize;
+        let mut texture_pixel = *texture.get_pixel(width as u32, height as u32);
+
+        (0..=2).for_each(|i| {texture_pixel[i] = (texture_pixel[i] as f64 * intensity) as u8;});
+
+        texture_pixel
+    }
+}
+
 pub struct GouraudShader {
     pub varying_intensity: Vector3<f64>,
     pub varying_texture: Matrix2x3<f64>
