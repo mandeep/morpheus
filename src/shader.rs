@@ -19,16 +19,16 @@ pub fn lookat(eye: &Vector3<f64>, center: &Vector3<f64>, up: &Vector3<f64>) -> M
     let y = z.cross(&x).normalize();
 
     let mut matrix: Matrix4<f64> = Matrix4::identity();
-    let mut transpose: Matrix4<f64> = Matrix4::identity();
+    let mut translation: Matrix4<f64> = Matrix4::identity();
 
     for i in 0..3 {
         matrix.row_mut(0)[i] = x[i];
         matrix.row_mut(1)[i] = y[i];
         matrix.row_mut(2)[i] = z[i];
-        transpose.row_mut(i)[3] = -center[i];
+        translation.row_mut(i)[3] = -center[i];
     }
 
-    matrix * transpose
+    matrix * translation
 }
 
 
