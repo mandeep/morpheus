@@ -195,8 +195,8 @@ pub fn draw_wire_mesh(filename: &str, buffer: &mut image::RgbImage) {
 
     for face in coordinates.geometric_faces {
         for i in 0..3 {
-            let v0 = coordinates.geometric_vertices[(face[i] - 1) as usize];
-            let v1 = coordinates.geometric_vertices[(face[(i+1) % 3] - 1) as usize];
+            let v0 = coordinates.geometric_vertices[(face[i]) as usize];
+            let v1 = coordinates.geometric_vertices[(face[(i+1) % 3]) as usize];
 
             let x0 = ((v0.x + 1.0) * buffer.width() as f64 / 2.0).min(buffer.width() as f64 - 1.0);
             let y0 = ((v0.y + 1.0) * buffer.height() as f64 / 2.0).min(buffer.height() as f64 - 1.0);
