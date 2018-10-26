@@ -151,7 +151,7 @@ fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
                  shader: &shader::Shader) {
 
     let projected_points = &points.iter()
-                                  .map(|&point| vector::project_to_3d(point).remove_row(2))
+                                  .map(|&point| vector::project_to_3d(&point).remove_row(2))
                                   .collect();
 
     let (bounding_box_minimum, bounding_box_maximum) = find_bounding_box(&projected_points, buffer);

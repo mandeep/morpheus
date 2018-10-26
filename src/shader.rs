@@ -129,8 +129,8 @@ impl Shader for FlatShader {
         self.varying_texture.set_column(vertex_index, &coordinates.texture_vertices[texture_index]);
         self.varying_intensity = *light_vector;
 
-        let gl_vertex = vector::vectorize_to_4d(coordinates.geometric_vertices[geometric_index]);
-        let projected_coordinate = vector::project_to_3d(projection * model_view * gl_vertex);
+        let gl_vertex = vector::vectorize_to_4d(&coordinates.geometric_vertices[geometric_index]);
+        let projected_coordinate = vector::project_to_3d(&(projection * model_view * gl_vertex));
 
         (0..=2).for_each(|i| { self.world_coordinates[vertex_index][i] = projected_coordinate[i];});
 
@@ -191,7 +191,7 @@ impl Shader for CelShader {
 
         self.varying_texture.set_column(vertex_index, &coordinates.texture_vertices[texture_index]);
 
-        let gl_vertex = vector::vectorize_to_4d(coordinates.geometric_vertices[geometric_index]);
+        let gl_vertex = vector::vectorize_to_4d(&coordinates.geometric_vertices[geometric_index]);
 
         view_port * projection * model_view * gl_vertex
     }
@@ -248,7 +248,7 @@ impl Shader for GouraudShader {
 
         self.varying_texture.set_column(vertex_index, &coordinates.texture_vertices[texture_index]);
 
-        let gl_vertex = vector::vectorize_to_4d(coordinates.geometric_vertices[geometric_index]);
+        let gl_vertex = vector::vectorize_to_4d(&coordinates.geometric_vertices[geometric_index]);
 
         view_port * projection * model_view * gl_vertex
     }
