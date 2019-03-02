@@ -1,11 +1,11 @@
 [package]
 name = "rastermind"
-version = "0.6.17"
+version = "0.6.18"
 authors = ["mandeep <mandeep@users.noreply.github.com>"]
 
 [dependencies]
-image = "0.18.0"
-nalgebra = "0.14.1"
+image = "0.21.0"
+nalgebra = "0.17.2"
 
 [profile.dev]
 opt-level = 2

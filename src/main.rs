@@ -3,7 +3,6 @@ extern crate image;
 extern crate nalgebra;
 
 use std::env;
-use std::fs::File;
 
 use nalgebra::core::Vector3;
 
@@ -30,9 +29,7 @@ fn main() {
     render::draw_triangle_mesh(&args[1], &mut buffer, &texture, depth,
                                &light_vector, &eye, &center, &up);
 
-    let ref mut render = File::create("output.png").unwrap();
-
     image::ImageRgb8(buffer).flipv()
-                            .save(render, image::PNG)
+                            .save("output.png")
                             .unwrap();
 }
