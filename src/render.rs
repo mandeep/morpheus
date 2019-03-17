@@ -276,10 +276,9 @@ mod tests {
         draw_line(1500, 1599, 0, 1590, &mut buffer, image::Rgb([255, 255, 255]));
         draw_line(1400, 409, 1500, 900, &mut buffer, image::Rgb([255, 255, 255]));
 
-        let ref mut fout = File::create(&dir).unwrap();
-
+        File::create(&dir).unwrap();
         image::ImageRgb8(buffer).flipv()
-                                .save(fout, image::PNG)
+                                .save(dir.to_str().unwrap())
                                 .unwrap();
 
         // test must be run in the project root directory
@@ -308,10 +307,9 @@ mod tests {
         fill_triangle(Point2::new(0, 0), Point2::new(343, 499), Point2::new(1135, 1478),
                       &mut buffer, image::Rgb([255, 255, 255]));
 
-        let ref mut fout = File::create(&dir).unwrap();
-
+        File::create(&dir).unwrap();
         image::ImageRgb8(buffer).flipv()
-                                .save(fout, image::PNG)
+                                .save(dir.to_str().unwrap())
                                 .unwrap();
 
         let test_file = image::open("./tests/test_triangle.png").unwrap().to_rgb();
