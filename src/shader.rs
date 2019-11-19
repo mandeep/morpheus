@@ -1,7 +1,4 @@
-extern crate nalgebra;
-extern crate image;
-
-use nalgebra::core::{Matrix2x3, Matrix4, Vector2, Vector3, Vector4};
+use nalgebra::{Matrix2x3, Matrix4, Vector2, Vector3, Vector4};
 
 use vector;
 use wavefront;

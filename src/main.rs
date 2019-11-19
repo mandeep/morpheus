@@ -4,7 +4,7 @@ extern crate nalgebra;
 
 use std::env;
 
-use nalgebra::core::Vector3;
+use nalgebra::Vector3;
 
 mod render;
 mod shader;

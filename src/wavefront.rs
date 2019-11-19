@@ -1,10 +1,8 @@
-extern crate nalgebra;
-
 use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 
-use nalgebra::core::{Vector2, Vector3};
+use nalgebra::{Vector2, Vector3};
 
 
 /// A wavefront object containing vertices and faces from a wavefront file.

@@ -1,6 +1,4 @@
-extern crate nalgebra;
-
-use nalgebra::core::{Vector2, Vector3, Vector4};
+use nalgebra::{Vector2, Vector3, Vector4};
 
 
 /// Project 3D coordinates into 2D by dividing the x and y coordinate by the z coordinate
