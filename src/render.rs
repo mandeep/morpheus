@@ -148,7 +148,7 @@ fn find_bounding_box(points: &Vec<Vector2<f64>>,
 ///
 fn draw_triangle(points: &Vec<Vector4<f64>>, buffer: &mut image::RgbImage,
                  texture: &image::RgbImage, zbuffer: &mut Vec<f64>,
-                 shader: &shader::Shader) {
+                 shader: &dyn Shader) {
 
     let projected_points = &points.iter()
                                   .map(|&point| vector::project_to_3d(&point).remove_row(2))
