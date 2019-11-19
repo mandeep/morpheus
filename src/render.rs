@@ -120,11 +120,8 @@ fn find_bounding_box(points: &Vec<Vector2<f64>>,
     let mut bounding_box_maximum = Vector2::new(0, 0);
 
     for point in points {
-            bounding_box_minimum.x = bounding_box_minimum.x.min(point.x as u32);
-            bounding_box_minimum.y = bounding_box_minimum.y.min(point.y as u32);
-
-            bounding_box_maximum.x = bounding_box_maximum.x.max(point.x as u32);
-            bounding_box_maximum.y = bounding_box_maximum.y.max(point.y as u32);
+            bounding_box_minimum = bounding_box_minimum.zip_map(&point, |a, b| a.min(b as u32));
+            bounding_box_maximum = bounding_box_maximum.zip_map(&point, |a, b| a.max(b as u32));
     }
 
     (bounding_box_minimum, bounding_box_maximum)
